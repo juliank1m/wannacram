@@ -16,7 +16,7 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="text-center space-y-8 max-w-lg">
         <div>
-          <h1 className="text-5xl font-bold tracking-tight">ExamPrep AI</h1>
+          <h1 className="text-5xl font-bold tracking-tight">WannaCram</h1>
           <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">
             Upload your lecture notes, slides, or past exams and let AI help you
             study with summaries, flashcards, and practice questions.

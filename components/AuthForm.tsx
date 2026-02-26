@@ -59,7 +59,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {mode === 'login'
               ? 'Sign in to access your study materials'
-              : 'Get started with ExamPrep AI'}
+              : 'Get started with WannaCram'}
           </p>
         </div>
 

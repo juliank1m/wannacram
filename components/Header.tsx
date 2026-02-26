@@ -18,7 +18,7 @@ export default function Header() {
     <header className="border-b border-gray-200 dark:border-gray-800">
       <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
         <Link href="/dashboard" className="text-lg font-bold">
-          ExamPrep AI
+          WannaCram
         </Link>
         <nav className="flex items-center gap-4">
           <Link
