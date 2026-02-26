@@ -66,8 +66,9 @@ export async function POST(request: Request) {
       });
 
     if (storageError) {
+      const message = storageError.message || 'Failed to upload file to storage';
       return NextResponse.json(
-        { error: 'Failed to upload file to storage' },
+        { error: message },
         { status: 500 }
       );
     }

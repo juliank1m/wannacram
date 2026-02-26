@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import anthropic, { FLASHCARD_PROMPT } from '@/lib/anthropic';
+import { FLASHCARD_PROMPT, generateCompletion } from '@/lib/ai';
+import { getUserFriendlyAiError } from '@/lib/error-messages';
+import type { AIModel } from '@/types';
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +15,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { documentId } = (await request.json()) as { documentId: string };
+    const { documentId, model = 'claude-sonnet' } = (await request.json()) as {
+      documentId: string;
+      model?: AIModel;
+    };
 
     if (!documentId) {
       return NextResponse.json(
@@ -41,16 +46,7 @@ export async function POST(request: Request) {
       extractedText = extractedText.slice(0, 150000);
     }
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      messages: [
-        { role: 'user', content: FLASHCARD_PROMPT(extractedText) },
-      ],
-    });
-
-    const text =
-      response.content[0].type === 'text' ? response.content[0].text : '';
+    const text = await generateCompletion(model, FLASHCARD_PROMPT(extractedText));
 
     try {
       const flashcards = JSON.parse(text);
@@ -61,9 +57,10 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-  } catch {
+  } catch (err) {
+    console.error('Flashcards route error:', err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getUserFriendlyAiError(err) },
       { status: 500 }
     );
   }

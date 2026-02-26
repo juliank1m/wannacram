@@ -33,3 +33,5 @@ export interface QuizQuestion {
   answer: string;
   explanation: string;
 }
+
+export type AIModel = 'claude-sonnet' | 'gpt-4o-mini';

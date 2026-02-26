@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import anthropic, { CHAT_SYSTEM_PROMPT } from '@/lib/anthropic';
-import type { Message } from '@/types';
+import { CHAT_SYSTEM_PROMPT, streamChat } from '@/lib/ai';
+import { getUserFriendlyAiError } from '@/lib/error-messages';
+import type { Message, AIModel } from '@/types';
 
 export async function POST(request: Request) {
   try {
@@ -14,9 +15,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { documentId, messages } = (await request.json()) as {
+    const { documentId, messages, model = 'claude-sonnet' } = (await request.json()) as {
       documentId: string;
       messages: Message[];
+      model?: AIModel;
     };
 
     if (!documentId || !messages?.length) {
@@ -26,7 +28,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fetch document
     const { data: doc, error: dbError } = await supabase
       .from('documents')
       .select('extracted_text')
@@ -46,43 +47,7 @@ export async function POST(request: Request) {
       extractedText = extractedText.slice(0, 150000);
     }
 
-    // Stream response from Claude
-    const stream = anthropic.messages.stream({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      system: CHAT_SYSTEM_PROMPT(extractedText),
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    });
-
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const event of stream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
-              );
-            }
-          }
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          controller.close();
-        } catch (err) {
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: err instanceof Error ? err.message : 'Stream error' })}\n\n`
-            )
-          );
-          controller.close();
-        }
-      },
-    });
+    const readable = streamChat(model, CHAT_SYSTEM_PROMPT(extractedText), messages);
 
     return new Response(readable, {
       headers: {
@@ -91,9 +56,10 @@ export async function POST(request: Request) {
         Connection: 'keep-alive',
       },
     });
-  } catch {
+  } catch (err) {
+    console.error('Chat route error:', err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getUserFriendlyAiError(err) },
       { status: 500 }
     );
   }

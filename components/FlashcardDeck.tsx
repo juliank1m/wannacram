@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Flashcard } from '@/types';
+import type { Flashcard, AIModel } from '@/types';
 
-export default function FlashcardDeck({ documentId }: { documentId: string }) {
+export default function FlashcardDeck({ documentId, model }: { documentId: string; model: AIModel }) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -18,7 +18,7 @@ export default function FlashcardDeck({ documentId }: { documentId: string }) {
       const res = await fetch('/api/flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId }),
+        body: JSON.stringify({ documentId, model }),
       });
       if (!res.ok) {
         const data = await res.json();

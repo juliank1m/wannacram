@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import type { QuizQuestion } from '@/types';
+import type { QuizQuestion, AIModel } from '@/types';
 
-export default function QuizMode({ documentId }: { documentId: string }) {
+export default function QuizMode({ documentId, model }: { documentId: string; model: AIModel }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export default function QuizMode({ documentId }: { documentId: string }) {
       const res = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId }),
+        body: JSON.stringify({ documentId, model }),
       });
       if (!res.ok) {
         const data = await res.json();

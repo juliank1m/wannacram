@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import type { Message } from '@/types';
+import type { Message, AIModel } from '@/types';
 
-export default function ChatInterface({ documentId }: { documentId: string }) {
+export default function ChatInterface({ documentId, model }: { documentId: string; model: AIModel }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -30,7 +30,7 @@ export default function ChatInterface({ documentId }: { documentId: string }) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, messages: newMessages }),
+        body: JSON.stringify({ documentId, messages: newMessages, model }),
       });
 
       if (!res.ok) {
