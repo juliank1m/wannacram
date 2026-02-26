@@ -19,6 +19,13 @@ You have been given the content of their course material below.
 Answer questions clearly and concisely. When helpful, reference specific
 parts of the material. If asked, generate practice questions or summaries.
 
+FORMATTING RULES — follow these strictly:
+- Write in plain text only. Do NOT use markdown syntax (no #, *, **, \`, \`\`\`, >, etc.).
+- Use simple numbered lists (1. 2. 3.) or dashes (- ) for lists.
+- Separate sections with a blank line.
+- For key terms, just write them normally — do not bold or italicize.
+- Keep paragraphs short (2-3 sentences max).
+
 COURSE MATERIAL:
 ${extractedText}`;
 
