@@ -34,6 +34,7 @@ the most important concepts a student should know for an exam.
 
 Respond ONLY with a JSON array in this format (no markdown, no extra text):
 [{"front": "question or term", "back": "answer or definition"}, ...]
+Each section of the JSON array should flow smoothly into the next. Ex. If the question is a yes or no question, the answer should be a yes or no answer with the explanation if needed.
 
 COURSE MATERIAL:
 ${extractedText}`;
