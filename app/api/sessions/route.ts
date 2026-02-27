@@ -35,6 +35,53 @@ export async function GET(request: Request) {
   }
 }
 
+// PATCH: reset quiz progress for a document (keep questions, reset position/score)
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { documentId } = (await request.json()) as { documentId: string };
+    if (!documentId) {
+      return NextResponse.json({ error: 'Missing documentId' }, { status: 400 });
+    }
+
+    const { data: existing } = await supabase
+      .from('study_sessions')
+      .select('id, messages')
+      .eq('user_id', user.id)
+      .eq('document_id', documentId)
+      .eq('mode', 'quiz')
+      .maybeSingle();
+
+    if (existing?.messages?.questions) {
+      await supabase
+        .from('study_sessions')
+        .update({
+          messages: {
+            questions: existing.messages.questions,
+            currentIndex: 0,
+            score: 0,
+            answered: 0,
+            quizComplete: false,
+            selectedAnswer: null,
+            showExplanation: false,
+          },
+        })
+        .eq('id', existing.id);
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('Sessions PATCH error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();

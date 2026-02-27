@@ -23,6 +23,25 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       .finally(() => setSessionLoading(false));
   }, [documentId]);
 
+  // Restore unsent draft on mount
+  useEffect(() => {
+    try {
+      const draft = sessionStorage.getItem(`chat-draft-${documentId}`);
+      if (draft) setInput(draft);
+    } catch {}
+  }, [documentId]);
+
+  // Persist draft on every keystroke
+  useEffect(() => {
+    try {
+      if (input) {
+        sessionStorage.setItem(`chat-draft-${documentId}`, input);
+      } else {
+        sessionStorage.removeItem(`chat-draft-${documentId}`);
+      }
+    } catch {}
+  }, [input, documentId]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);

@@ -41,6 +41,24 @@ export default function StudyPage({
       .catch(() => {});
   }, [params.docId]);
 
+  // On leaving the document page: clear chat draft and reset quiz progress
+  useEffect(() => {
+    const docId = params.docId;
+    return () => {
+      // Clear unsent chat draft from sessionStorage
+      try { sessionStorage.removeItem(`chat-draft-${docId}`); } catch {}
+
+      // Reset quiz progress in DB (keep questions, reset position/score).
+      // keepalive: true lets the request complete even after the component unmounts.
+      fetch('/api/sessions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docId }),
+        keepalive: true,
+      }).catch(() => {});
+    };
+  }, [params.docId]);
+
   return (
     <>
       <Header />
