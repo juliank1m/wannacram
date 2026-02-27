@@ -5,6 +5,9 @@ export default async function HomePage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const displayName: string | null = user?.user_metadata?.display_name ?? null;
+  const greeting = displayName ? `Welcome back, ${displayName}.` : 'Welcome back.';
+
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -14,16 +17,21 @@ export default async function HomePage() {
           <span className="font-pixel text-[13px] tracking-tight leading-none">WANNACRAM</span>
           <div className="flex items-center gap-3">
             {user ? (
-              <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
-                DASHBOARD
-              </Link>
+              <>
+                <Link href="/upload" className="pixel-btn">
+                  Upload
+                </Link>
+                <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
+                  My Docs
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/auth/login" className="pixel-btn">
-                  SIGN IN
+                  Sign in
                 </Link>
                 <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
-                  GET STARTED
+                  Get started
                 </Link>
               </>
             )}
@@ -35,29 +43,53 @@ export default async function HomePage() {
 
         {/* ── Hero ───────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-4 pt-20 pb-20 text-center">
-          <div className="inline-block pixel-badge bg-[var(--px-yellow)] text-white border-ink mb-8">
-            AI-POWERED STUDYING
-          </div>
 
-          <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
-            LEVEL UP YOUR<br />
-            <span className="text-[var(--px-blue)]">STUDY GAME</span>
-          </h1>
-
-          <p className="font-vt323 text-2xl text-ink/85 max-w-xl mx-auto mb-10 leading-relaxed">
-            Upload your lecture notes, slides, or past exams.
-            WannaCram generates flashcards, quizzes, and
-            an AI tutor trained on your actual course material.
-          </p>
-
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
-              START FOR FREE
-            </Link>
-            <Link href="/auth/login" className="pixel-btn">
-              SIGN IN
-            </Link>
-          </div>
+          {user ? (
+            <>
+              <div className="inline-block pixel-badge bg-[var(--px-green)] text-white border-ink mb-8">
+                Logged in
+              </div>
+              <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
+                {greeting.split(',')[0]},<br />
+                <span className="text-[var(--px-blue)]">{greeting.split(',').slice(1).join(',').trim() || 'keep it up.'}</span>
+              </h1>
+              <p className="font-vt323 text-2xl text-ink/85 max-w-xl mx-auto mb-10 leading-relaxed">
+                Your documents and study sessions are waiting.
+                Pick up where you left off, or upload something new.
+              </p>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
+                  My Documents
+                </Link>
+                <Link href="/upload" className="pixel-btn">
+                  Upload a file
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="inline-block pixel-badge bg-[var(--px-yellow)] text-white border-ink mb-8">
+                AI-powered studying
+              </div>
+              <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
+                LEVEL UP YOUR<br />
+                <span className="text-[var(--px-blue)]">STUDY GAME</span>
+              </h1>
+              <p className="font-vt323 text-2xl text-ink/85 max-w-xl mx-auto mb-10 leading-relaxed">
+                Upload your lecture notes, slides, or past exams.
+                WannaCram generates flashcards, quizzes, and
+                an AI tutor trained on your actual course material.
+              </p>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
+                  Start for free
+                </Link>
+                <Link href="/auth/login" className="pixel-btn">
+                  Sign in
+                </Link>
+              </div>
+            </>
+          )}
         </section>
 
         {/* ── Features ───────────────────────────────────────── */}
@@ -89,8 +121,7 @@ export default async function HomePage() {
               },
             ].map(({ tag, title, desc, color }) => (
               <div key={title} className="pixel-box p-0 overflow-hidden">
-                <div className="font-pixel text-[11px] px-4 py-3 border-b-[3px] border-ink text-white"
-                     style={{ background: color }}>
+                <div className="pixel-titlebar" style={{ background: color, borderBottomColor: color }}>
                   {tag}
                 </div>
                 <div className="p-5">
@@ -130,27 +161,49 @@ export default async function HomePage() {
         {/* ── Formats ────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-4 pb-20">
           <div className="flex items-center justify-center gap-8 flex-wrap">
-            <span className="font-pixel text-[11px] text-ink/60">ACCEPTS</span>
+            <span className="font-pixelify font-semibold text-[14px] text-ink/60">Accepts</span>
             {['PDF', 'DOCX', 'PPTX'].map((f) => (
               <span key={f} className="pixel-badge">{f}</span>
             ))}
-            <span className="font-pixel text-[11px] text-ink/60">MAX 20MB</span>
+            <span className="font-pixelify font-semibold text-[14px] text-ink/60">Max 20MB</span>
           </div>
         </section>
 
         {/* ── CTA ────────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-4 pb-24 text-center">
           <div className="pixel-box p-10 max-w-xl mx-auto" style={{ boxShadow: '6px 6px 0px var(--ink)' }}>
-            <div className="pixel-titlebar -mx-[3px] -mt-[3px] mb-6 text-center">
-              READY TO PLAY?
-            </div>
-            <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
-              Free to get started. No credit card required.<br />
-              Your next exam isn't going to ace itself.
-            </p>
-            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
-              CREATE FREE ACCOUNT
-            </Link>
+            {user ? (
+              <>
+                <div className="pixel-titlebar -mx-[3px] -mt-[3px] mb-6 text-center">
+                  KEEP STUDYING
+                </div>
+                <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
+                  Head to your document library to continue a session,
+                  or upload new material to get started on something fresh.
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
+                    My Documents
+                  </Link>
+                  <Link href="/upload" className="pixel-btn">
+                    Upload new file
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="pixel-titlebar -mx-[3px] -mt-[3px] mb-6 text-center">
+                  READY TO PLAY?
+                </div>
+                <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
+                  Free to get started. No credit card required.<br />
+                  Your next exam isn't going to ace itself.
+                </p>
+                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
+                  Create free account
+                </Link>
+              </>
+            )}
           </div>
         </section>
 
