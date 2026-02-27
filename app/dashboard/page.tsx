@@ -44,7 +44,7 @@ export default function DashboardPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="pixel-spinner" />
-            <p className="font-pixel text-[11px] text-ink/60 pixel-cursor">LOADING</p>
+            <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
           </div>
         ) : documents.length === 0 ? (
           <div className="pixel-box p-0 max-w-md mx-auto overflow-hidden">
@@ -71,7 +71,7 @@ export default function DashboardPage() {
                   <div className="h-1.5 w-full" style={{ background: FILE_TYPE_COLORS[doc.file_type] ?? 'var(--ink)' }} />
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <h2 className="font-pixel text-[11px] leading-relaxed line-clamp-2 flex-1">
+                      <h2 className="font-pixelify font-bold text-[14px] leading-snug line-clamp-2 flex-1">
                         {doc.title}
                       </h2>
                       <span className="pixel-badge text-[9px] shrink-0"
@@ -83,7 +83,7 @@ export default function DashboardPage() {
                       <p className="font-vt323 text-[18px] text-ink/65">
                         {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <span className="font-pixel text-[10px] text-[var(--px-blue)] group-hover:text-ink transition-colors">
+                      <span className="font-pixelify font-semibold text-[13px] text-[var(--px-blue)] group-hover:text-ink transition-colors">
                         STUDY ▶
                       </span>
                     </div>

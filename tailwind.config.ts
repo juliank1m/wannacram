@@ -22,6 +22,7 @@ const config: Config = {
       fontFamily: {
         pixel: ["var(--font-pixel)", "monospace"],
         vt323: ["var(--font-vt323)", "monospace"],
+        pixelify: ["var(--font-pixelify)", "monospace"],
       },
       boxShadow: {
         pixel: "4px 4px 0px var(--ink)",

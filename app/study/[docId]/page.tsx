@@ -61,11 +61,11 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
         <div className="flex items-center justify-between mb-5 gap-4">
           <div className="min-w-0">
             {title && (
-              <h1 className="font-pixel text-[10px] leading-loose truncate text-ink/80">{title}</h1>
+              <h1 className="font-pixelify font-bold text-[16px] truncate text-ink/85">{title}</h1>
             )}
           </div>
           <div className="shrink-0 flex items-center gap-2">
-            <span className="font-pixel text-[10px] text-ink/60">MODEL:</span>
+            <span className="font-pixelify font-semibold text-[14px] text-ink/60">Model:</span>
             <div className="flex border-[3px] border-ink overflow-hidden" style={{ boxShadow: '3px 3px 0 var(--ink)' }}>
               {MODELS.map((m) => (
                 <button
@@ -74,7 +74,7 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
                     setModel(m.value);
                     try { localStorage.setItem(`model-pref-${params.docId}`, m.value); } catch {}
                   }}
-                  className={`font-pixel text-[10px] px-3 py-2 transition-colors ${
+                  className={`font-pixelify font-semibold text-[14px] px-3 py-2 transition-colors ${
                     model === m.value
                       ? 'bg-ink text-surface'
                       : 'bg-surface text-ink/70 hover:bg-[var(--surface-alt)]'
@@ -93,7 +93,7 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
             <button
               key={tabMode}
               onClick={() => setMode(tabMode)}
-              className={`flex-1 flex items-center justify-center py-3 font-pixel text-[11px] transition-colors border-r-[3px] border-ink last:border-r-0 ${
+              className={`flex-1 flex items-center justify-center py-3 font-pixelify font-bold text-[15px] transition-colors border-r-[3px] border-ink last:border-r-0 ${
                 mode === tabMode
                   ? 'bg-ink text-surface'
                   : 'bg-surface text-ink/70 hover:bg-[var(--surface-alt)]'

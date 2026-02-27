@@ -81,7 +81,7 @@ export default function FileUploader() {
               <div className="flex justify-center">
                 <div className="pixel-spinner" style={{ width: 32, height: 32, borderWidth: 5 }} />
               </div>
-              <p className="font-pixel text-[10px] text-ink/70 pixel-cursor">{progress}</p>
+              <p className="font-pixelify font-semibold text-[15px] text-ink/70 pixel-cursor">{progress}</p>
               {/* Pixel progress bar */}
               <div className="border-[3px] border-ink h-6 w-full mt-4 overflow-hidden">
                 <div className="h-full bg-[var(--px-blue)] animate-pulse" style={{ width: '60%' }} />
@@ -92,7 +92,7 @@ export default function FileUploader() {
               {/* Pixel file icon */}
               <div className="w-12 h-14 mx-auto mb-5 border-[3px] border-ink bg-surface flex items-center justify-center"
                    style={{ boxShadow: '3px 3px 0 var(--ink)' }} aria-hidden>
-                <span className="font-pixel text-[9px] text-ink/60">FILE</span>
+                <span className="font-pixelify font-bold text-[12px] text-ink/60">FILE</span>
               </div>
               <p className="font-vt323 text-xl text-ink/75 mb-5">
                 Drag and drop your file here
@@ -119,7 +119,7 @@ export default function FileUploader() {
 
       {error && (
         <div className="mt-3 border-[3px] border-[var(--px-red)] px-4 py-2" style={{ boxShadow: '3px 3px 0 var(--px-red)' }}>
-          <p className="font-pixel text-[11px] text-[var(--px-red)] leading-relaxed">{error}</p>
+          <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] leading-relaxed">{error}</p>
         </div>
       )}
     </div>

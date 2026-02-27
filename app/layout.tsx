@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, VT323 } from "next/font/google";
+import { Press_Start_2P, VT323, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 
 const pressStart = Press_Start_2P({
@@ -16,6 +16,13 @@ const vt323 = VT323({
   display: "swap",
 });
 
+const pixelifySans = Pixelify_Sans({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-pixelify",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "WannaCram",
   description: "AI-powered study assistant for exam preparation",
@@ -27,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${pressStart.variable} ${vt323.variable}`}>
+    <html lang="en" className={`${pressStart.variable} ${vt323.variable} ${pixelifySans.variable}`}>
       <body className="antialiased min-h-screen bg-background text-foreground">
         {children}
       </body>

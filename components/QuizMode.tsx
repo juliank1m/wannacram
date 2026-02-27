@@ -122,7 +122,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[10px] text-ink/60 pixel-cursor">LOADING</p>
+        <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
                 </span>
               ) : '▶ START QUIZ'}
             </button>
-            {error && <p className="font-pixel text-[11px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
+            {error && <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
         </div>
       </div>
@@ -186,9 +186,9 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     <div className="max-w-2xl mx-auto">
       {/* Progress */}
       <div className="mb-5">
-        <div className="flex justify-between font-pixel text-[10px] text-ink/70 mb-2">
-          <span>Q{currentIndex + 1}/{questions.length}</span>
-          <span>SCORE: {score}/{answered}</span>
+        <div className="flex justify-between font-pixelify font-semibold text-[14px] text-ink/70 mb-2">
+          <span>Q{currentIndex + 1} / {questions.length}</span>
+          <span>Score: {score}/{answered}</span>
         </div>
         <div className="border-[3px] border-ink h-4 w-full overflow-hidden">
           <div className="h-full bg-[var(--px-blue)] transition-all duration-300" style={{ width: `${progress}%` }} />

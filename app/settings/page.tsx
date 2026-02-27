@@ -100,7 +100,7 @@ export default function SettingsPage() {
       <Header />
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[11px] text-ink/60 pixel-cursor">LOADING</p>
+        <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
     </>
   );
@@ -108,7 +108,7 @@ export default function SettingsPage() {
   if (!profile) return (
     <>
       <Header />
-      <div className="text-center py-20 font-pixel text-[11px] text-ink/60">FAILED TO LOAD PROFILE</div>
+      <div className="text-center py-20 font-pixelify font-semibold text-[16px] text-ink/60">Failed to load profile</div>
     </>
   );
 
@@ -179,12 +179,12 @@ export default function SettingsPage() {
             DANGER ZONE
           </div>
           <div className="p-6 bg-surface">
-            <p className="font-pixel text-[11px] text-[var(--px-red)] mb-2 leading-loose">DELETE ACCOUNT</p>
+            <p className="font-pixelify font-bold text-[15px] text-[var(--px-red)] mb-2 leading-loose">Delete Account</p>
             <p className="font-vt323 text-xl text-ink/75 mb-5 leading-snug">
               Permanently deletes your account and all documents, flashcards, and quiz history. This cannot be undone.
             </p>
             <p className="font-vt323 text-xl mb-3">
-              Type <span className="font-pixel text-[11px]">delete my account</span> to confirm:
+              Type <span className="font-pixelify font-bold text-[inherit]">delete my account</span> to confirm:
             </p>
             <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="delete my account" className="pixel-input mb-4"
                    style={{ borderColor: 'var(--px-red)' }} />

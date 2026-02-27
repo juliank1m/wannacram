@@ -60,7 +60,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[10px] text-ink/60 pixel-cursor">LOADING</p>
+        <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
                 </span>
               ) : '▶ GENERATE CARDS'}
             </button>
-            {error && <p className="font-pixel text-[11px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
+            {error && <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
   }
 
   if (flashcards.length === 0) {
-    return <p className="font-pixel text-[11px] text-center text-ink/60 mt-12">NO CARDS GENERATED.</p>;
+    return <p className="font-pixelify font-semibold text-[15px] text-center text-ink/60 mt-12">No cards generated.</p>;
   }
 
   const card = flashcards[currentIndex];
@@ -100,8 +100,8 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
     <div className="flex flex-col items-center h-[calc(100vh-18rem)]">
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-4">
-        <div className="flex justify-between font-pixel text-[10px] text-ink/70 mb-2">
-          <span>CARD {currentIndex + 1} OF {flashcards.length}</span>
+        <div className="flex justify-between font-pixelify font-semibold text-[14px] text-ink/70 mb-2">
+          <span>Card {currentIndex + 1} of {flashcards.length}</span>
           <span>{progress}%</span>
         </div>
         <div className="border-[3px] border-ink h-4 w-full overflow-hidden">
@@ -136,8 +136,8 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
             className="font-vt323 text-xl text-center w-full"
           />
         </div>
-        <div className="absolute bottom-2 right-3 font-pixel text-[9px] text-ink/50">
-          {flipped ? 'CLICK TO FLIP' : 'CLICK TO REVEAL'}
+        <div className="absolute bottom-2 right-3 font-pixelify text-[13px] text-ink/50">
+          {flipped ? 'Click to flip' : 'Click to reveal'}
         </div>
       </div>
 

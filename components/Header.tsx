@@ -63,12 +63,12 @@ export default function Header() {
 
         <nav className="flex items-center gap-5">
           <Link href="/dashboard"
-                className="font-pixel text-[11px] text-ink/70 hover:text-ink transition-colors tracking-wide">
-            DOCS
+                className="font-pixelify font-semibold text-[15px] text-ink/70 hover:text-ink transition-colors">
+            Docs
           </Link>
           <Link href="/upload"
-                className="font-pixel text-[11px] text-ink/70 hover:text-ink transition-colors tracking-wide">
-            UPLOAD
+                className="font-pixelify font-semibold text-[15px] text-ink/70 hover:text-ink transition-colors">
+            Upload
           </Link>
 
           {userInfo && (
@@ -84,27 +84,22 @@ export default function Header() {
                     PLAYER INFO
                   </div>
                   {/* User info */}
-                  <div className="px-3 py-2 border-b-[2px] border-ink/30">
-                    <p className="font-pixel text-[11px] truncate leading-relaxed">
+                  <div className="px-3 py-2 border-b-[2px] border-ink/20">
+                    <p className="font-pixelify font-semibold text-[15px] truncate">
                       {userInfo.displayName ?? userInfo.email.split('@')[0]}
                     </p>
-                    <p className="font-vt323 text-[17px] text-ink/70 truncate">{userInfo.email}</p>
                   </div>
                   {/* Menu items */}
                   <div className="py-1">
                     <Link href="/settings" onClick={() => setOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[11px] hover:bg-[var(--surface-alt)] transition-colors">
-                      PROFILE
-                    </Link>
-                    <Link href="/settings" onClick={() => setOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[11px] hover:bg-[var(--surface-alt)] transition-colors">
-                      SETTINGS
+                          className="flex items-center gap-2 px-3 py-2 font-pixelify font-semibold text-[15px] hover:bg-[var(--surface-alt)] transition-colors">
+                      Settings
                     </Link>
                   </div>
-                  <div className="border-t-[2px] border-ink/30 py-1">
+                  <div className="border-t-[2px] border-ink/20 py-1">
                     <button onClick={handleLogout}
-                            className="w-full text-left flex items-center gap-2 px-3 py-2 font-pixel text-[11px] text-[var(--px-red)] hover:bg-[var(--surface-alt)] transition-colors">
-                      LOGOUT
+                            className="w-full text-left flex items-center gap-2 px-3 py-2 font-pixelify font-semibold text-[15px] text-[var(--px-red)] hover:bg-[var(--surface-alt)] transition-colors">
+                      Log out
                     </button>
                   </div>
                 </div>
