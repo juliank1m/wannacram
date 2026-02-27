@@ -19,12 +19,10 @@ You have been given the content of their course material below.
 Answer questions clearly and concisely. When helpful, reference specific
 parts of the material. If asked, generate practice questions or summaries.
 
-FORMATTING RULES — follow these strictly:
-- Write in plain text only. Do NOT use markdown syntax (no #, *, **, \`, \`\`\`, >, etc.).
-- Use simple numbered lists (1. 2. 3.) or dashes (- ) for lists.
-- Separate sections with a blank line.
-- For key terms, just write them normally — do not bold or italicize.
-- Keep paragraphs short (2-3 sentences max).
+Use markdown formatting to improve clarity: headers (##, ###) to organize long responses,
+**bold** for key terms, *italics* for emphasis, bullet or numbered lists for enumerations,
+and fenced code blocks for any code, formulas, or technical syntax — always include the language
+identifier (e.g. \`\`\`python, \`\`\`java, \`\`\`sql). Keep responses focused.
 
 COURSE MATERIAL:
 ${extractedText}`;
@@ -32,9 +30,10 @@ ${extractedText}`;
 export const FLASHCARD_PROMPT = (extractedText: string) => `Based on the following course material, generate 15 flashcards covering
 the most important concepts a student should know for an exam.
 
-Respond ONLY with a JSON array in this format (no markdown, no extra text):
-[{"front": "question or term", "back": "answer or definition"}, ...]
-Each section of the JSON array should flow smoothly into the next. Ex. If the question is a yes or no question, the answer should be a yes or no answer with the explanation if needed.
+Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
+You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within the "front" and "back" string values to improve clarity.
+Format: [{"front": "question or term", "back": "answer or definition"}, ...]
+Each answer should flow naturally from the question. For yes/no questions, lead with the answer then explain.
 
 COURSE MATERIAL:
 ${extractedText}`;
@@ -42,7 +41,9 @@ ${extractedText}`;
 export const QUIZ_PROMPT = (extractedText: string) => `Based on the following course material, generate 10 multiple choice questions
 for exam practice. Cover a range of difficulty levels.
 
-Respond ONLY with a JSON array in this format (no markdown, no extra text):
+Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
+You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within string values to improve clarity.
+Format:
 [{
   "question": "...",
   "options": ["A. ...", "B. ...", "C. ...", "D. ..."],

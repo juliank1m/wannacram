@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Flashcard, AIModel } from '@/types';
+import MarkdownRenderer from './MarkdownRenderer';
 
 export default function FlashcardDeck({ documentId, model }: { documentId: string; model: AIModel }) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -70,17 +71,20 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
         Card {currentIndex + 1} of {flashcards.length}
       </div>
 
-      <button
+      <div
         onClick={() => setFlipped(!flipped)}
-        className="w-full max-w-lg h-64 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-8 flex items-center justify-center text-center cursor-pointer hover:border-blue-500 transition-colors"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && setFlipped(!flipped)}
+        className="w-full max-w-lg min-h-64 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-8 flex items-center justify-center text-center cursor-pointer hover:border-blue-500 transition-colors"
       >
-        <div>
+        <div className="w-full">
           <div className="text-xs uppercase tracking-wide text-gray-400 mb-3">
             {flipped ? 'Answer' : 'Question'}
           </div>
-          <p className="text-lg">{flipped ? card.back : card.front}</p>
+          <MarkdownRenderer content={flipped ? card.back : card.front} className="text-lg" />
         </div>
-      </button>
+      </div>
 
       <p className="text-xs text-gray-400 mt-2">Click card to flip</p>
 

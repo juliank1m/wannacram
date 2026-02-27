@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { QuizQuestion, AIModel } from '@/types';
+import MarkdownRenderer from './MarkdownRenderer';
 
 export default function QuizMode({ documentId, model }: { documentId: string; model: AIModel }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -131,7 +132,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
         </span>
       </div>
 
-      <h2 className="text-lg font-medium mb-4">{q.question}</h2>
+      <MarkdownRenderer content={q.question} className="text-lg font-medium mb-4" />
 
       <div className="space-y-2">
         {q.options.map((option) => {
@@ -167,7 +168,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
           <p className="font-medium mb-1">
             {selectedAnswer === q.answer ? 'Correct!' : `Incorrect. The answer is ${q.answer}.`}
           </p>
-          <p className="text-gray-600 dark:text-gray-400">{q.explanation}</p>
+          <MarkdownRenderer content={q.explanation} className="text-gray-600 dark:text-gray-400" />
         </div>
       )}
 
