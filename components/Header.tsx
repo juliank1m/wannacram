@@ -48,7 +48,7 @@ export default function Header({ showAuthLinks = false }: { showAuthLinks?: bool
   const handleLogout = async () => {
     setOpen(false);
     await supabase.auth.signOut();
-    router.push('/auth/login');
+    router.push('/');
     router.refresh();
   };
 
