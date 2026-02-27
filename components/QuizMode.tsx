@@ -131,12 +131,12 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)]">
         <div className="pixel-box p-0 overflow-hidden max-w-sm w-full">
-          <div className="pixel-titlebar text-[9px] text-center">QUIZ MODE</div>
+          <div className="pixel-titlebar text-center">QUIZ MODE</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
               Generate a quiz from your document to test your knowledge
             </p>
-            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary text-[9px]">
+            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="pixel-spinner" style={{ width: 12, height: 12, borderWidth: 3 }} />
@@ -144,7 +144,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
                 </span>
               ) : '▶ START QUIZ'}
             </button>
-            {error && <p className="font-pixel text-[8px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
+            {error && <p className="font-pixel text-[11px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
         </div>
       </div>
@@ -168,8 +168,8 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
               <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: gradeColor }} />
             </div>
             <div className="flex gap-3 justify-center">
-              <button onClick={retry} className="pixel-btn text-[9px]">↺ RETRY</button>
-              <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary text-[9px]">
+              <button onClick={retry} className="pixel-btn">RETRY</button>
+              <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
                 {loading ? '...' : '▶ NEW QUIZ'}
               </button>
             </div>
@@ -197,7 +197,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
 
       {/* Question */}
       <div className="pixel-box p-0 overflow-hidden mb-4">
-        <div className="pixel-titlebar text-[8px]">QUESTION {currentIndex + 1}</div>
+        <div className="pixel-titlebar">QUESTION {currentIndex + 1}</div>
         <div className="p-4">
           <MarkdownRenderer content={q.question} className="font-vt323 text-xl leading-snug" />
         </div>
@@ -246,7 +246,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       )}
 
       {selectedAnswer && (
-        <button onClick={nextQuestion} className="pixel-btn pixel-btn-primary text-[9px]">
+        <button onClick={nextQuestion} className="pixel-btn pixel-btn-primary">
           {currentIndex < questions.length - 1 ? 'NEXT ▶' : 'SEE RESULTS ▶'}
         </button>
       )}

@@ -36,7 +36,7 @@ export default function DashboardPage() {
               {loading ? '...' : `${documents.length} file${documents.length !== 1 ? 's' : ''} saved`}
             </p>
           </div>
-          <Link href="/upload" className="pixel-btn pixel-btn-primary text-[9px]">
+          <Link href="/upload" className="pixel-btn pixel-btn-primary">
             + UPLOAD
           </Link>
         </div>
@@ -44,18 +44,18 @@ export default function DashboardPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="pixel-spinner" />
-            <p className="font-pixel text-[9px] text-ink/50 pixel-cursor">LOADING</p>
+            <p className="font-pixel text-[11px] text-ink/60 pixel-cursor">LOADING</p>
           </div>
         ) : documents.length === 0 ? (
           <div className="pixel-box p-0 max-w-md mx-auto overflow-hidden">
-            <div className="pixel-titlebar text-[9px]">INVENTORY EMPTY</div>
+            <div className="pixel-titlebar">INVENTORY EMPTY</div>
             <div className="p-8 text-center">
               <p className="font-vt323 text-xl text-ink/60 mb-6 leading-relaxed">
                 No documents yet.<br />
                 Upload your first study material to begin.
               </p>
-              <Link href="/upload" className="pixel-btn pixel-btn-primary text-[9px]">
-                ▶ UPLOAD NOW
+              <Link href="/upload" className="pixel-btn pixel-btn-primary">
+                UPLOAD NOW
               </Link>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function DashboardPage() {
                   <div className="h-1.5 w-full" style={{ background: FILE_TYPE_COLORS[doc.file_type] ?? 'var(--ink)' }} />
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <h2 className="font-pixel text-[9px] leading-relaxed line-clamp-2 flex-1">
+                      <h2 className="font-pixel text-[11px] leading-relaxed line-clamp-2 flex-1">
                         {doc.title}
                       </h2>
                       <span className="pixel-badge text-[9px] shrink-0"

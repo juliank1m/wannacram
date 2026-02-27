@@ -117,7 +117,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       <div className="flex-1 overflow-y-auto space-y-4 pb-4 pr-1">
         {messages.length === 0 && (
           <div className="pixel-box p-0 max-w-md mx-auto mt-12 overflow-hidden">
-            <div className="pixel-titlebar text-[9px] text-center">READY TO STUDY</div>
+            <div className="pixel-titlebar text-center">READY TO STUDY</div>
             <div className="p-6 text-center">
               <p className="font-vt323 text-xl text-ink/55 leading-relaxed">
                 Ask anything about your document.<br />
@@ -172,7 +172,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
           <button
             type="submit"
             disabled={streaming || !input.trim()}
-            className="pixel-btn pixel-btn-primary text-[9px] shrink-0"
+            className="pixel-btn pixel-btn-primary shrink-0"
           >
             {streaming ? '...' : 'SEND ▶'}
           </button>

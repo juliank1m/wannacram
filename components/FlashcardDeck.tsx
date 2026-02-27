@@ -69,12 +69,12 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)]">
         <div className="pixel-box p-0 overflow-hidden max-w-sm w-full">
-          <div className="pixel-titlebar text-[9px] text-center">FLASHCARDS</div>
+          <div className="pixel-titlebar text-center">FLASHCARDS</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
               Generate flashcards from your document to start studying
             </p>
-            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary text-[9px]">
+            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="pixel-spinner" style={{ width: 12, height: 12, borderWidth: 3 }} />
@@ -82,7 +82,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
                 </span>
               ) : '▶ GENERATE CARDS'}
             </button>
-            {error && <p className="font-pixel text-[8px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
+            {error && <p className="font-pixel text-[11px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
   }
 
   if (flashcards.length === 0) {
-    return <p className="font-pixel text-[9px] text-center text-ink/50 mt-12">NO CARDS GENERATED.</p>;
+    return <p className="font-pixel text-[11px] text-center text-ink/60 mt-12">NO CARDS GENERATED.</p>;
   }
 
   const card = flashcards[currentIndex];
@@ -126,8 +126,8 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
         }}
       >
         {/* Title bar */}
-        <div className="font-pixel text-[8px] px-3 py-2 border-b-[3px] border-ink text-surface"
-             style={{ background: flipped ? 'var(--px-green)' : 'var(--ink)' }}>
+        <div className="pixel-titlebar text-center"
+             style={{ background: flipped ? 'var(--px-green)' : 'var(--ink)', borderBottomColor: flipped ? 'var(--px-green)' : 'var(--ink)' }}>
           {flipped ? '[ ANSWER ]' : '[ QUESTION ]'}
         </div>
         <div className="p-6 flex items-center justify-center min-h-[140px] bg-surface">
@@ -146,18 +146,18 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
         <button
           onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
           disabled={currentIndex === 0}
-          className="pixel-btn text-[9px]"
+          className="pixel-btn"
         >
-          ◀ PREV
+          PREV
         </button>
         <button
           onClick={() => setCurrentIndex(Math.min(flashcards.length - 1, currentIndex + 1))}
           disabled={currentIndex === flashcards.length - 1}
-          className="pixel-btn text-[9px]"
+          className="pixel-btn"
         >
-          NEXT ▶
+          NEXT
         </button>
-        <button onClick={generate} disabled={loading} className="pixel-btn text-[9px] text-ink/50">
+        <button onClick={generate} disabled={loading} className="pixel-btn text-ink/60">
           {loading ? '...' : '↺ REDO'}
         </button>
       </div>

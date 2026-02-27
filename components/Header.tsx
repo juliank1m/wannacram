@@ -10,7 +10,7 @@ function PixelAvatar({ name, email }: { name: string | null; email: string }) {
     ? name.trim().split(/\s+/).map((w) => w[0]).join('').toUpperCase().slice(0, 2)
     : email[0].toUpperCase();
   return (
-    <div className="h-9 w-9 bg-[var(--px-blue)] text-white flex items-center justify-center font-pixel text-[9px] border-[3px] border-ink cursor-pointer select-none"
+    <div className="h-9 w-9 bg-[var(--px-blue)] text-white flex items-center justify-center font-pixel text-[11px] border-[3px] border-ink cursor-pointer select-none"
          style={{ boxShadow: '3px 3px 0px var(--ink)' }}>
       {initials}
     </div>
@@ -80,31 +80,31 @@ export default function Header() {
               {open && (
                 <div className="absolute right-0 mt-2 w-52 z-50 pixel-box bg-surface">
                   {/* Title bar */}
-                  <div className="pixel-titlebar text-[9px]">
+                  <div className="pixel-titlebar">
                     PLAYER INFO
                   </div>
                   {/* User info */}
                   <div className="px-3 py-2 border-b-[2px] border-ink/30">
-                    <p className="font-pixel text-[8px] truncate leading-relaxed">
+                    <p className="font-pixel text-[11px] truncate leading-relaxed">
                       {userInfo.displayName ?? userInfo.email.split('@')[0]}
                     </p>
-                    <p className="font-vt323 text-[16px] text-ink/60 truncate">{userInfo.email}</p>
+                    <p className="font-vt323 text-[17px] text-ink/70 truncate">{userInfo.email}</p>
                   </div>
                   {/* Menu items */}
                   <div className="py-1">
                     <Link href="/settings" onClick={() => setOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[9px] hover:bg-[var(--surface-alt)] transition-colors">
-                      ▶ PROFILE
+                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[11px] hover:bg-[var(--surface-alt)] transition-colors">
+                      PROFILE
                     </Link>
                     <Link href="/settings" onClick={() => setOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[9px] hover:bg-[var(--surface-alt)] transition-colors">
-                      ▶ SETTINGS
+                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[11px] hover:bg-[var(--surface-alt)] transition-colors">
+                      SETTINGS
                     </Link>
                   </div>
                   <div className="border-t-[2px] border-ink/30 py-1">
                     <button onClick={handleLogout}
-                            className="w-full text-left flex items-center gap-2 px-3 py-2 font-pixel text-[9px] text-[var(--px-red)] hover:bg-[var(--surface-alt)] transition-colors">
-                      ▶ LOGOUT
+                            className="w-full text-left flex items-center gap-2 px-3 py-2 font-pixel text-[11px] text-[var(--px-red)] hover:bg-[var(--surface-alt)] transition-colors">
+                      LOGOUT
                     </button>
                   </div>
                 </div>

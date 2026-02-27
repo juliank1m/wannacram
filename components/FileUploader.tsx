@@ -70,7 +70,7 @@ export default function FileUploader() {
           borderColor: dragActive ? 'var(--px-blue)' : 'var(--ink)',
         }}
       >
-        <div className="pixel-titlebar text-[9px] text-center"
+        <div className="pixel-titlebar text-center"
              style={{ background: dragActive ? 'var(--px-blue)' : 'var(--ink)' }}>
           {dragActive ? '[ DROP IT! ]' : '[ FILE UPLOAD ]'}
         </div>
@@ -97,7 +97,7 @@ export default function FileUploader() {
               <p className="font-vt323 text-xl text-ink/75 mb-5">
                 Drag and drop your file here
               </p>
-              <label className="pixel-btn pixel-btn-primary text-[9px] cursor-pointer">
+              <label className="pixel-btn pixel-btn-primary cursor-pointer">
                 ▶ BROWSE FILES
                 <input
                   type="file"
@@ -108,7 +108,7 @@ export default function FileUploader() {
               </label>
               <div className="flex justify-center gap-3 mt-6">
                 {['PDF', 'DOCX', 'PPTX'].map((f) => (
-                  <span key={f} className="pixel-badge text-[8px]">{f}</span>
+                  <span key={f} className="pixel-badge">{f}</span>
                 ))}
               </div>
               <p className="font-vt323 text-[18px] text-ink/60 mt-3">MAX 20MB</p>
@@ -119,7 +119,7 @@ export default function FileUploader() {
 
       {error && (
         <div className="mt-3 border-[3px] border-[var(--px-red)] px-4 py-2" style={{ boxShadow: '3px 3px 0 var(--px-red)' }}>
-          <p className="font-pixel text-[8px] text-[var(--px-red)] leading-relaxed">{error}</p>
+          <p className="font-pixel text-[11px] text-[var(--px-red)] leading-relaxed">{error}</p>
         </div>
       )}
     </div>

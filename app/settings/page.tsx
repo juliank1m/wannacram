@@ -10,7 +10,7 @@ interface UserProfile { email: string; displayName: string | null; createdAt: st
 function PixelSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="pixel-box p-0 overflow-hidden mb-6">
-      <div className="pixel-titlebar text-[9px]">{title}</div>
+      <div className="pixel-titlebar">{title}</div>
       <div className="p-6">{children}</div>
     </div>
   );
@@ -20,7 +20,7 @@ function Msg({ type, text }: { type: 'success' | 'error' | 'info'; text: string 
   const color = type === 'success' ? 'var(--px-green)' : type === 'error' ? 'var(--px-red)' : 'var(--px-yellow)';
   return (
     <div className="border-[3px] px-3 py-2 mt-3" style={{ borderColor: color, background: `${color}18` }}>
-      <p className="font-pixel text-[8px] leading-relaxed" style={{ color }}>{text.toUpperCase()}</p>
+      <p className="font-pixel text-[11px] leading-relaxed" style={{ color }}>{text.toUpperCase()}</p>
     </div>
   );
 }
@@ -100,7 +100,7 @@ export default function SettingsPage() {
       <Header />
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[8px] text-ink/40 pixel-cursor">LOADING</p>
+        <p className="font-pixel text-[11px] text-ink/60 pixel-cursor">LOADING</p>
       </div>
     </>
   );
@@ -108,7 +108,7 @@ export default function SettingsPage() {
   if (!profile) return (
     <>
       <Header />
-      <div className="text-center py-20 font-pixel text-[9px] text-ink/50">FAILED TO LOAD PROFILE</div>
+      <div className="text-center py-20 font-pixel text-[11px] text-ink/60">FAILED TO LOAD PROFILE</div>
     </>
   );
 
@@ -149,8 +149,8 @@ export default function SettingsPage() {
               <p className="font-vt323 text-[16px] text-ink/60 mt-1">Email cannot be changed.</p>
             </div>
             {profileMsg && <Msg type={profileMsg.type} text={profileMsg.text} />}
-            <button type="submit" disabled={savingProfile || !displayName.trim()} className="pixel-btn pixel-btn-primary text-[9px]">
-              {savingProfile ? 'SAVING...' : '▶ SAVE CHANGES'}
+            <button type="submit" disabled={savingProfile || !displayName.trim()} className="pixel-btn pixel-btn-primary">
+              {savingProfile ? 'SAVING...' : 'SAVE CHANGES'}
             </button>
           </form>
         </PixelSection>
@@ -167,30 +167,30 @@ export default function SettingsPage() {
               <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" className="pixel-input" />
             </div>
             {passwordMsg && <Msg type={passwordMsg.type} text={passwordMsg.text} />}
-            <button type="submit" disabled={savingPassword || !newPassword || !confirmPassword} className="pixel-btn pixel-btn-primary text-[9px]">
-              {savingPassword ? 'UPDATING...' : '▶ UPDATE PASSWORD'}
+            <button type="submit" disabled={savingPassword || !newPassword || !confirmPassword} className="pixel-btn pixel-btn-primary">
+              {savingPassword ? 'UPDATING...' : 'UPDATE PASSWORD'}
             </button>
           </form>
         </PixelSection>
 
         {/* Danger zone */}
         <div className="border-[3px] border-[var(--px-red)] overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--px-red)' }}>
-          <div className="font-pixel text-[9px] px-4 py-2 text-white" style={{ background: 'var(--px-red)' }}>
-            ⚠ DANGER ZONE
+          <div className="pixel-titlebar" style={{ background: 'var(--px-red)', borderBottomColor: 'var(--px-red)' }}>
+            DANGER ZONE
           </div>
           <div className="p-6 bg-surface">
-            <p className="font-pixel text-[9px] text-[var(--px-red)] mb-1 leading-loose">DELETE ACCOUNT</p>
-            <p className="font-vt323 text-[18px] text-ink/60 mb-5 leading-snug">
+            <p className="font-pixel text-[11px] text-[var(--px-red)] mb-2 leading-loose">DELETE ACCOUNT</p>
+            <p className="font-vt323 text-xl text-ink/75 mb-5 leading-snug">
               Permanently deletes your account and all documents, flashcards, and quiz history. This cannot be undone.
             </p>
-            <p className="font-vt323 text-[18px] mb-2">
-              Type <span className="font-pixel text-[10px]">delete my account</span> to confirm:
+            <p className="font-vt323 text-xl mb-3">
+              Type <span className="font-pixel text-[11px]">delete my account</span> to confirm:
             </p>
             <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="delete my account" className="pixel-input mb-4"
                    style={{ borderColor: 'var(--px-red)' }} />
             {deleteMsg && <Msg type="error" text={deleteMsg.text} />}
-            <button onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'delete my account'} className="pixel-btn pixel-btn-danger text-[9px]">
-              {deleting ? 'DELETING...' : '⚠ DELETE ACCOUNT'}
+            <button onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'delete my account'} className="pixel-btn pixel-btn-danger">
+              {deleting ? 'DELETING...' : 'DELETE ACCOUNT'}
             </button>
           </div>
         </div>

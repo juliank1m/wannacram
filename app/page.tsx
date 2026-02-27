@@ -14,15 +14,15 @@ export default async function HomePage() {
           <span className="font-pixel text-[13px] tracking-tight leading-none">WANNACRAM</span>
           <div className="flex items-center gap-3">
             {user ? (
-              <Link href="/dashboard" className="pixel-btn pixel-btn-primary text-[9px]">
-                ▶ DASHBOARD
+              <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
+                DASHBOARD
               </Link>
             ) : (
               <>
-                <Link href="/auth/login" className="pixel-btn text-[9px]">
+                <Link href="/auth/login" className="pixel-btn">
                   SIGN IN
                 </Link>
-                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[9px]">
+                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
                   GET STARTED
                 </Link>
               </>
@@ -34,13 +34,11 @@ export default async function HomePage() {
       <main className="flex-1">
 
         {/* ── Hero ───────────────────────────────────────────── */}
-        <section className="mx-auto max-w-5xl px-4 pt-20 pb-16 text-center">
-          {/* Pixel badge */}
-          <div className="inline-block pixel-badge text-[8px] bg-[var(--px-yellow)] text-white border-ink mb-8">
-            ★ AI-POWERED STUDYING ★
+        <section className="mx-auto max-w-5xl px-4 pt-20 pb-20 text-center">
+          <div className="inline-block pixel-badge bg-[var(--px-yellow)] text-white border-ink mb-8">
+            AI-POWERED STUDYING
           </div>
 
-          {/* Big pixel title */}
           <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
             LEVEL UP YOUR<br />
             <span className="text-[var(--px-blue)]">STUDY GAME</span>
@@ -53,69 +51,60 @@ export default async function HomePage() {
           </p>
 
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[10px]">
-              ▶ START FOR FREE
+            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
+              START FOR FREE
             </Link>
-            <Link href="/auth/login" className="pixel-btn text-[10px]">
+            <Link href="/auth/login" className="pixel-btn">
               SIGN IN
             </Link>
-          </div>
-
-          {/* Pixel decorations */}
-          <div className="flex justify-center gap-6 mt-14 opacity-20 font-pixel text-[8px] select-none">
-            <span>■ ■ ■</span>
-            <span>▲ ▲ ▲</span>
-            <span>● ● ●</span>
           </div>
         </section>
 
         {/* ── Features ───────────────────────────────────────── */}
-        <section className="border-y-[3px] border-ink bg-surface">
-          <div className="mx-auto max-w-5xl px-4 py-16">
-            <div className="text-center mb-12">
-              <h2 className="font-pixel text-[14px] leading-loose mb-3">3 WAYS TO STUDY</h2>
-              <p className="font-vt323 text-xl text-ink/80">All powered by AI. All built from your own material.</p>
-            </div>
+        <section className="mx-auto max-w-5xl px-4 pb-20">
+          <div className="text-center mb-12">
+            <h2 className="font-pixel text-[14px] leading-loose mb-3">3 WAYS TO STUDY</h2>
+            <p className="font-vt323 text-xl text-ink/80">All powered by AI. All built from your own material.</p>
+          </div>
 
-            <div className="grid gap-6 sm:grid-cols-3">
-              {[
-                {
-                  tag: 'MODE 1',
-                  title: 'AI TUTOR',
-                  desc: 'Ask anything about your document. Get answers grounded in your course material — not generic search results.',
-                  color: 'var(--px-blue)',
-                },
-                {
-                  tag: 'MODE 2',
-                  title: 'FLASHCARDS',
-                  desc: 'Auto-generated from your notes. Key concepts distilled into cards you can flip through anywhere.',
-                  color: 'var(--px-yellow)',
-                },
-                {
-                  tag: 'MODE 3',
-                  title: 'PRACTICE QUIZ',
-                  desc: 'Multiple-choice questions at varying difficulty. Instant feedback and explanations to lock in knowledge.',
-                  color: 'var(--px-green)',
-                },
-              ].map(({ tag, title, desc, color }) => (
-                <div key={title} className="pixel-box p-0 overflow-hidden">
-                  <div className="font-pixel text-[9px] px-4 py-2 border-b-[3px] border-ink text-white"
-                       style={{ background: color }}>
-                    {tag}
-                  </div>
-                  <div className="p-5">
-                    <div className="w-8 h-8 mb-4 border-[3px] border-ink" style={{ background: color }} />
-                    <h3 className="font-pixel text-[11px] mb-3 leading-loose">{title}</h3>
-                    <p className="font-vt323 text-xl text-ink/80 leading-snug">{desc}</p>
-                  </div>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                tag: 'MODE 1',
+                title: 'AI TUTOR',
+                desc: 'Ask anything about your document. Get answers grounded in your course material — not generic search results.',
+                color: 'var(--px-blue)',
+              },
+              {
+                tag: 'MODE 2',
+                title: 'FLASHCARDS',
+                desc: 'Auto-generated from your notes. Key concepts distilled into cards you can flip through anywhere.',
+                color: 'var(--px-yellow)',
+              },
+              {
+                tag: 'MODE 3',
+                title: 'PRACTICE QUIZ',
+                desc: 'Multiple-choice questions at varying difficulty. Instant feedback and explanations to lock in knowledge.',
+                color: 'var(--px-green)',
+              },
+            ].map(({ tag, title, desc, color }) => (
+              <div key={title} className="pixel-box p-0 overflow-hidden">
+                <div className="font-pixel text-[11px] px-4 py-3 border-b-[3px] border-ink text-white"
+                     style={{ background: color }}>
+                  {tag}
                 </div>
-              ))}
-            </div>
+                <div className="p-5">
+                  <div className="w-8 h-8 mb-4 border-[3px] border-ink" style={{ background: color }} />
+                  <h3 className="font-pixel text-[11px] mb-3 leading-loose">{title}</h3>
+                  <p className="font-vt323 text-xl text-ink/80 leading-snug">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
         {/* ── How it works ───────────────────────────────────── */}
-        <section className="mx-auto max-w-5xl px-4 py-16">
+        <section className="mx-auto max-w-5xl px-4 pb-20">
           <div className="text-center mb-12">
             <h2 className="font-pixel text-[14px] leading-loose mb-3">HOW TO PLAY</h2>
             <p className="font-vt323 text-xl text-ink/80">From upload to ready in minutes.</p>
@@ -138,29 +127,29 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Formats bar ────────────────────────────────────── */}
-        <section className="border-y-[3px] border-ink bg-surface">
-          <div className="mx-auto max-w-5xl px-4 py-6 flex items-center justify-center gap-8 flex-wrap">
-            <span className="font-pixel text-[9px] text-ink/50">ACCEPTS</span>
+        {/* ── Formats ────────────────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-4 pb-20">
+          <div className="flex items-center justify-center gap-8 flex-wrap">
+            <span className="font-pixel text-[11px] text-ink/60">ACCEPTS</span>
             {['PDF', 'DOCX', 'PPTX'].map((f) => (
-              <span key={f} className="pixel-badge font-pixel text-[9px]">{f}</span>
+              <span key={f} className="pixel-badge">{f}</span>
             ))}
-            <span className="font-pixel text-[9px] text-ink/50">MAX 20MB</span>
+            <span className="font-pixel text-[11px] text-ink/60">MAX 20MB</span>
           </div>
         </section>
 
         {/* ── CTA ────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-5xl px-4 py-20 text-center">
+        <section className="mx-auto max-w-5xl px-4 pb-24 text-center">
           <div className="pixel-box p-10 max-w-xl mx-auto" style={{ boxShadow: '6px 6px 0px var(--ink)' }}>
-            <div className="pixel-titlebar text-[10px] -mx-[3px] -mt-[3px] mb-6">
-              ★ READY TO PLAY? ★
+            <div className="pixel-titlebar -mx-[3px] -mt-[3px] mb-6 text-center">
+              READY TO PLAY?
             </div>
             <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
               Free to get started. No credit card required.<br />
               Your next exam isn't going to ace itself.
             </p>
-            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[10px]">
-              ▶ CREATE FREE ACCOUNT
+            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
+              CREATE FREE ACCOUNT
             </Link>
           </div>
         </section>
@@ -170,8 +159,8 @@ export default async function HomePage() {
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer className="border-t-[3px] border-ink bg-surface">
         <div className="mx-auto max-w-5xl px-4 py-5 flex items-center justify-between">
-          <span className="font-pixel text-[10px]">WANNACRAM</span>
-          <span className="font-vt323 text-[18px] text-ink/50">© {new Date().getFullYear()}</span>
+          <span className="font-pixel text-[11px]">WANNACRAM</span>
+          <span className="font-vt323 text-[18px] text-ink/60">© {new Date().getFullYear()}</span>
         </div>
       </footer>
 
