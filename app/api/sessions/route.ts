@@ -58,7 +58,8 @@ export async function PATCH(request: Request) {
       .eq('mode', 'quiz')
       .maybeSingle();
 
-    if (existing?.messages?.questions) {
+    // Only reset progress if the quiz wasn't completed — completed results are kept forever
+    if (existing?.messages?.questions && !existing.messages.quizComplete) {
       await supabase
         .from('study_sessions')
         .update({
