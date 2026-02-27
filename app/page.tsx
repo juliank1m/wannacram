@@ -1,5 +1,4 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export default async function HomePage() {
@@ -7,8 +6,6 @@ export default async function HomePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  if (user) redirect('/dashboard');
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -18,18 +15,29 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
           <span className="text-lg font-bold">WannaCram</span>
           <div className="flex items-center gap-3">
-            <Link
-              href="/auth/login"
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-foreground"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Get started
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Go to dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-foreground"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
