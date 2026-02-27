@@ -8,7 +8,20 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch(`/api/sessions?documentId=${documentId}&mode=chat`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.session?.messages) && data.session.messages.length > 0) {
+          setMessages(data.session.messages);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
+  }, [documentId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,6 +88,17 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
           }
         }
       }
+
+      // Save completed conversation to DB (fire and forget)
+      const finalMessages: Message[] = [
+        ...newMessages,
+        { role: 'assistant', content: fullContent },
+      ];
+      fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId, mode: 'chat', data: finalMessages }),
+      }).catch(() => {});
     } catch (err) {
       setMessages([
         ...newMessages,
@@ -87,6 +111,14 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       setStreaming(false);
     }
   };
+
+  if (sessionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-14rem)]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-14rem)]">

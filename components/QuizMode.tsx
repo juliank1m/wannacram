@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { QuizQuestion, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -15,6 +15,21 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
   const [error, setError] = useState<string | null>(null);
   const [generated, setGenerated] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/sessions?documentId=${documentId}&mode=quiz`)
+      .then((res) => res.json())
+      .then((data) => {
+        const saved = data.session?.messages?.questions;
+        if (Array.isArray(saved) && saved.length > 0) {
+          setQuestions(saved);
+          setGenerated(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
+  }, [documentId]);
 
   const generate = async () => {
     setLoading(true);
@@ -38,6 +53,17 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setScore(0);
       setAnswered(0);
       setQuizComplete(false);
+
+      // Save to DB (fire and forget)
+      fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId,
+          mode: 'quiz',
+          data: { questions: data.questions },
+        }),
+      }).catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -65,6 +91,14 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setQuizComplete(true);
     }
   };
+
+  if (sessionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-14rem)]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+      </div>
+    );
+  }
 
   if (!generated) {
     return (

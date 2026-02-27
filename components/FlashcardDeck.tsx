@@ -11,6 +11,21 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generated, setGenerated] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/sessions?documentId=${documentId}&mode=flashcards`)
+      .then((res) => res.json())
+      .then((data) => {
+        const saved = data.session?.messages?.flashcards;
+        if (Array.isArray(saved) && saved.length > 0) {
+          setFlashcards(saved);
+          setGenerated(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
+  }, [documentId]);
 
   const generate = async () => {
     setLoading(true);
@@ -30,6 +45,17 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
       setGenerated(true);
       setCurrentIndex(0);
       setFlipped(false);
+
+      // Save to DB (fire and forget)
+      fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId,
+          mode: 'flashcards',
+          data: { flashcards: data.flashcards },
+        }),
+      }).catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -40,6 +66,14 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
   useEffect(() => {
     setFlipped(false);
   }, [currentIndex]);
+
+  if (sessionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-14rem)]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+      </div>
+    );
+  }
 
   if (!generated) {
     return (
