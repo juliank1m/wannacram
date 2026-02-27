@@ -26,7 +26,13 @@ export default function StudyPage({
   params: { docId: string };
 }) {
   const [mode, setMode] = useState<Mode>('chat');
-  const [model, setModel] = useState<AIModel>('claude-sonnet');
+  const [model, setModel] = useState<AIModel>(() => {
+    try {
+      return (localStorage.getItem(`model-pref-${params.docId}`) as AIModel) ?? 'claude-sonnet';
+    } catch {
+      return 'claude-sonnet';
+    }
+  });
   const [title, setTitle] = useState<string>('');
 
   useEffect(() => {
@@ -71,7 +77,11 @@ export default function StudyPage({
           )}
           <select
             value={model}
-            onChange={(e) => setModel(e.target.value as AIModel)}
+            onChange={(e) => {
+              const m = e.target.value as AIModel;
+              setModel(m);
+              try { localStorage.setItem(`model-pref-${params.docId}`, m); } catch {}
+            }}
             className="rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {MODELS.map((m) => (
