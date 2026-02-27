@@ -169,7 +169,7 @@ export default async function HomePage() {
                 </div>
                 <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
                   Free to get started. No credit card required.<br />
-                  Your next exam isn't going to ace itself.
+                  Your next exam isn&apos;t going to ace itself.
                 </p>
                 <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
                   Create free account
