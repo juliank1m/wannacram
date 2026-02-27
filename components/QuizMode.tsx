@@ -4,6 +4,24 @@ import { useState, useEffect } from 'react';
 import type { QuizQuestion, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 
+interface QuizState {
+  questions: QuizQuestion[];
+  currentIndex: number;
+  score: number;
+  answered: number;
+  quizComplete: boolean;
+  selectedAnswer: string | null;
+  showExplanation: boolean;
+}
+
+function saveQuizState(documentId: string, state: QuizState) {
+  fetch('/api/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ documentId, mode: 'quiz', data: state }),
+  }).catch(() => {});
+}
+
 export default function QuizMode({ documentId, model }: { documentId: string; model: AIModel }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,9 +39,15 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     fetch(`/api/sessions?documentId=${documentId}&mode=quiz`)
       .then((res) => res.json())
       .then((data) => {
-        const saved = data.session?.messages?.questions;
-        if (Array.isArray(saved) && saved.length > 0) {
-          setQuestions(saved);
+        const saved: QuizState | undefined = data.session?.messages;
+        if (Array.isArray(saved?.questions) && saved.questions.length > 0) {
+          setQuestions(saved.questions);
+          setCurrentIndex(saved.currentIndex ?? 0);
+          setScore(saved.score ?? 0);
+          setAnswered(saved.answered ?? 0);
+          setQuizComplete(saved.quizComplete ?? false);
+          setSelectedAnswer(saved.selectedAnswer ?? null);
+          setShowExplanation(saved.showExplanation ?? false);
           setGenerated(true);
         }
       })
@@ -54,16 +78,15 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setAnswered(0);
       setQuizComplete(false);
 
-      // Save to DB (fire and forget)
-      fetch('/api/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          documentId,
-          mode: 'quiz',
-          data: { questions: data.questions },
-        }),
-      }).catch(() => {});
+      saveQuizState(documentId, {
+        questions: data.questions,
+        currentIndex: 0,
+        score: 0,
+        answered: 0,
+        quizComplete: false,
+        selectedAnswer: null,
+        showExplanation: false,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -74,22 +97,74 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
   const handleAnswer = (option: string) => {
     if (selectedAnswer) return;
     const letter = option.charAt(0);
+    const isCorrect = letter === questions[currentIndex].answer;
+    const newScore = isCorrect ? score + 1 : score;
+    const newAnswered = answered + 1;
+
     setSelectedAnswer(letter);
     setShowExplanation(true);
-    setAnswered((a) => a + 1);
-    if (letter === questions[currentIndex].answer) {
-      setScore((s) => s + 1);
-    }
+    setScore(newScore);
+    setAnswered(newAnswered);
+
+    saveQuizState(documentId, {
+      questions,
+      currentIndex,
+      score: newScore,
+      answered: newAnswered,
+      quizComplete: false,
+      selectedAnswer: letter,
+      showExplanation: true,
+    });
   };
 
   const nextQuestion = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex((i) => i + 1);
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
       setSelectedAnswer(null);
       setShowExplanation(false);
+
+      saveQuizState(documentId, {
+        questions,
+        currentIndex: newIndex,
+        score,
+        answered,
+        quizComplete: false,
+        selectedAnswer: null,
+        showExplanation: false,
+      });
     } else {
       setQuizComplete(true);
+
+      saveQuizState(documentId, {
+        questions,
+        currentIndex,
+        score,
+        answered,
+        quizComplete: true,
+        selectedAnswer,
+        showExplanation,
+      });
     }
+  };
+
+  const retry = () => {
+    setCurrentIndex(0);
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setScore(0);
+    setAnswered(0);
+    setQuizComplete(false);
+
+    saveQuizState(documentId, {
+      questions,
+      currentIndex: 0,
+      score: 0,
+      answered: 0,
+      quizComplete: false,
+      selectedAnswer: null,
+      showExplanation: false,
+    });
   };
 
   if (sessionLoading) {
@@ -129,14 +204,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
         <p className="text-gray-500 mb-6">{percentage}% correct</p>
         <div className="flex gap-3">
           <button
-            onClick={() => {
-              setCurrentIndex(0);
-              setSelectedAnswer(null);
-              setShowExplanation(false);
-              setScore(0);
-              setAnswered(0);
-              setQuizComplete(false);
-            }}
+            onClick={retry}
             className="rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-900"
           >
             Retry
