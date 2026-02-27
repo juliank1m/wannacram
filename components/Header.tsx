@@ -17,7 +17,7 @@ function PixelAvatar({ name, email }: { name: string | null; email: string }) {
   );
 }
 
-export default function Header() {
+export default function Header({ showAuthLinks = false }: { showAuthLinks?: boolean }) {
   const router = useRouter();
   const supabase = createClient();
   const [userInfo, setUserInfo] = useState<{ email: string; displayName: string | null } | null>(null);
@@ -70,6 +70,17 @@ export default function Header() {
                 className="font-pixelify font-semibold text-[15px] text-ink/70 hover:text-ink transition-colors">
             Upload
           </Link>
+
+          {showAuthLinks && !userInfo && (
+            <>
+              <Link href="/auth/login" className="pixel-btn">
+                Sign in
+              </Link>
+              <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
+                Get started
+              </Link>
+            </>
+          )}
 
           {userInfo && (
             <div ref={dropdownRef} className="relative">

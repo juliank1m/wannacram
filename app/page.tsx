@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 export default async function HomePage() {
   const supabase = await createServerSupabaseClient();
@@ -11,33 +12,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen flex flex-col">
 
-      {/* ── Navbar ─────────────────────────────────────────── */}
-      <header className="border-b-[3px] border-ink bg-surface" style={{ boxShadow: '0 3px 0px var(--ink)' }}>
-        <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
-          <span className="font-pixel text-[13px] tracking-tight leading-none">WANNACRAM</span>
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <Link href="/upload" className="pixel-btn">
-                  Upload
-                </Link>
-                <Link href="/dashboard" className="pixel-btn pixel-btn-primary">
-                  My Docs
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login" className="pixel-btn">
-                  Sign in
-                </Link>
-                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary">
-                  Get started
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header showAuthLinks={!user} />
 
       <main className="flex-1">
 
@@ -46,9 +21,6 @@ export default async function HomePage() {
 
           {user ? (
             <>
-              <div className="inline-block pixel-badge bg-[var(--px-green)] text-white border-ink mb-8">
-                Logged in
-              </div>
               <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
                 {greeting.split(',')[0]},<br />
                 <span className="text-[var(--px-blue)]">{greeting.split(',').slice(1).join(',').trim() || 'keep it up.'}</span>
