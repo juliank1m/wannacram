@@ -5,12 +5,13 @@ import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-function UserAvatar({ name, email }: { name: string | null; email: string }) {
+function PixelAvatar({ name, email }: { name: string | null; email: string }) {
   const initials = name
     ? name.trim().split(/\s+/).map((w) => w[0]).join('').toUpperCase().slice(0, 2)
     : email[0].toUpperCase();
   return (
-    <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold shrink-0 cursor-pointer">
+    <div className="h-9 w-9 bg-[var(--px-blue)] text-white flex items-center justify-center font-pixel text-[9px] border-[3px] border-ink cursor-pointer select-none"
+         style={{ boxShadow: '3px 3px 0px var(--ink)' }}>
       {initials}
     </div>
   );
@@ -34,7 +35,6 @@ export default function Header() {
     });
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -53,59 +53,58 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-800">
+    <header className="border-b-[3px] border-ink bg-[var(--surface)]"
+            style={{ boxShadow: '0 3px 0px var(--ink)' }}>
       <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-bold">
-          WannaCram
+        {/* Logo */}
+        <Link href="/" className="font-pixel text-[13px] tracking-tight text-ink hover:text-[var(--px-blue)] transition-colors leading-none">
+          WANNACRAM
         </Link>
-        <nav className="flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="text-sm text-gray-600 dark:text-gray-300 hover:text-foreground"
-          >
-            Dashboard
+
+        <nav className="flex items-center gap-5">
+          <Link href="/dashboard"
+                className="font-pixel text-[9px] text-ink/70 hover:text-ink transition-colors tracking-wide">
+            DOCS
           </Link>
-          <Link
-            href="/upload"
-            className="text-sm text-gray-600 dark:text-gray-300 hover:text-foreground"
-          >
-            Upload
+          <Link href="/upload"
+                className="font-pixel text-[9px] text-ink/70 hover:text-ink transition-colors tracking-wide">
+            UPLOAD
           </Link>
 
           {userInfo && (
             <div ref={dropdownRef} className="relative">
-              <button onClick={() => setOpen((o) => !o)}>
-                <UserAvatar name={userInfo.displayName} email={userInfo.email} />
+              <button onClick={() => setOpen((o) => !o)} aria-label="Account menu">
+                <PixelAvatar name={userInfo.displayName} email={userInfo.email} />
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg z-50 py-1">
-                  <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
-                    <p className="text-xs font-medium truncate">
+                <div className="absolute right-0 mt-2 w-52 z-50 pixel-box bg-surface">
+                  {/* Title bar */}
+                  <div className="pixel-titlebar text-[9px]">
+                    PLAYER INFO
+                  </div>
+                  {/* User info */}
+                  <div className="px-3 py-2 border-b-[2px] border-ink/30">
+                    <p className="font-pixel text-[8px] truncate leading-relaxed">
                       {userInfo.displayName ?? userInfo.email.split('@')[0]}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">{userInfo.email}</p>
+                    <p className="font-vt323 text-[16px] text-ink/60 truncate">{userInfo.email}</p>
                   </div>
-                  <Link
-                    href="/settings"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/settings"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    Settings
-                  </Link>
-                  <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      Logout
+                  {/* Menu items */}
+                  <div className="py-1">
+                    <Link href="/settings" onClick={() => setOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[9px] hover:bg-[var(--surface-alt)] transition-colors">
+                      ▶ PROFILE
+                    </Link>
+                    <Link href="/settings" onClick={() => setOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 font-pixel text-[9px] hover:bg-[var(--surface-alt)] transition-colors">
+                      ▶ SETTINGS
+                    </Link>
+                  </div>
+                  <div className="border-t-[2px] border-ink/30 py-1">
+                    <button onClick={handleLogout}
+                            className="w-full text-left flex items-center gap-2 px-3 py-2 font-pixel text-[9px] text-[var(--px-red)] hover:bg-[var(--surface-alt)] transition-colors">
+                      ▶ LOGOUT
                     </button>
                   </div>
                 </div>

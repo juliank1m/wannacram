@@ -3,38 +3,27 @@ import Link from 'next/link';
 
 export default async function HomePage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="min-h-screen flex flex-col">
 
-      {/* Navbar */}
-      <header className="border-b border-gray-200 dark:border-gray-800">
+      {/* ── Navbar ─────────────────────────────────────────── */}
+      <header className="border-b-[3px] border-ink bg-surface" style={{ boxShadow: '0 3px 0px var(--ink)' }}>
         <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
-          <span className="text-lg font-bold">WannaCram</span>
+          <span className="font-pixel text-[13px] tracking-tight leading-none">WANNACRAM</span>
           <div className="flex items-center gap-3">
             {user ? (
-              <Link
-                href="/dashboard"
-                className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                Go to dashboard
+              <Link href="/dashboard" className="pixel-btn pixel-btn-primary text-[9px]">
+                ▶ DASHBOARD
               </Link>
             ) : (
               <>
-                <Link
-                  href="/auth/login"
-                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-foreground"
-                >
-                  Sign in
+                <Link href="/auth/login" className="pixel-btn text-[9px]">
+                  SIGN IN
                 </Link>
-                <Link
-                  href="/auth/signup"
-                  className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  Get started
+                <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[9px]">
+                  GET STARTED
                 </Link>
               </>
             )}
@@ -44,165 +33,148 @@ export default async function HomePage() {
 
       <main className="flex-1">
 
-        {/* Hero */}
-        <section className="mx-auto max-w-5xl px-4 pt-24 pb-20 text-center">
-          <div className="inline-block rounded-full border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 mb-6">
-            AI-powered studying
+        {/* ── Hero ───────────────────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-4 pt-20 pb-16 text-center">
+          {/* Pixel badge */}
+          <div className="inline-block pixel-badge text-[8px] bg-[var(--px-yellow)] text-white border-ink mb-8">
+            ★ AI-POWERED STUDYING ★
           </div>
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight mb-6">
-            Turn your notes into
-            <br />
-            <span className="text-blue-600">exam-ready knowledge</span>
+
+          {/* Big pixel title */}
+          <h1 className="font-pixel leading-loose mb-6" style={{ fontSize: 'clamp(18px, 4vw, 36px)' }}>
+            LEVEL UP YOUR<br />
+            <span className="text-[var(--px-blue)]">STUDY GAME</span>
           </h1>
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-10">
-            Upload your lecture notes, slides, or past exams. WannaCram generates
-            flashcards, practice quizzes, and gives you an AI tutor — all trained on
-            your actual course material.
+
+          <p className="font-vt323 text-2xl text-ink/70 max-w-xl mx-auto mb-10 leading-relaxed">
+            Upload your lecture notes, slides, or past exams.
+            WannaCram generates flashcards, quizzes, and
+            an AI tutor trained on your actual course material.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/auth/signup"
-              className="rounded-md bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Get started free
+
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[10px]">
+              ▶ START FOR FREE
             </Link>
-            <Link
-              href="/auth/login"
-              className="rounded-md border border-gray-300 dark:border-gray-700 px-6 py-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-900"
-            >
-              Sign in
+            <Link href="/auth/login" className="pixel-btn text-[10px]">
+              SIGN IN
             </Link>
+          </div>
+
+          {/* Pixel decorations */}
+          <div className="flex justify-center gap-6 mt-14 opacity-20 font-pixel text-[8px] select-none">
+            <span>■ ■ ■</span>
+            <span>▲ ▲ ▲</span>
+            <span>● ● ●</span>
           </div>
         </section>
 
-        {/* Features */}
-        <section className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
-          <div className="mx-auto max-w-5xl px-4 py-20">
+        {/* ── Features ───────────────────────────────────────── */}
+        <section className="border-y-[3px] border-ink bg-surface">
+          <div className="mx-auto max-w-5xl px-4 py-16">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-3">Everything you need to study effectively</h2>
-              <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-                Three study modes, all powered by AI, all built around your own material.
-              </p>
+              <h2 className="font-pixel text-[14px] leading-loose mb-3">3 WAYS TO STUDY</h2>
+              <p className="font-vt323 text-xl text-ink/60">All powered by AI. All built from your own material.</p>
             </div>
+
             <div className="grid gap-6 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-                <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-950 flex items-center justify-center mb-4">
-                  <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
+              {[
+                {
+                  icon: '💬',
+                  tag: 'MODE 1',
+                  title: 'AI TUTOR',
+                  desc: 'Ask anything about your document. Get answers grounded in your course material — not generic search results.',
+                  color: 'var(--px-blue)',
+                },
+                {
+                  icon: '🗂',
+                  tag: 'MODE 2',
+                  title: 'FLASHCARDS',
+                  desc: 'Auto-generated from your notes. Key concepts distilled into cards you can flip through anywhere.',
+                  color: 'var(--px-yellow)',
+                },
+                {
+                  icon: '✅',
+                  tag: 'MODE 3',
+                  title: 'PRACTICE QUIZ',
+                  desc: 'Multiple-choice questions at varying difficulty. Instant feedback and explanations to lock in knowledge.',
+                  color: 'var(--px-green)',
+                },
+              ].map(({ icon, tag, title, desc, color }) => (
+                <div key={title} className="pixel-box p-0 overflow-hidden">
+                  <div className="font-pixel text-[8px] px-4 py-2 border-b-[3px] border-ink text-white"
+                       style={{ background: color }}>
+                    {tag}
+                  </div>
+                  <div className="p-5">
+                    <div className="text-3xl mb-3">{icon}</div>
+                    <h3 className="font-pixel text-[10px] mb-3 leading-loose">{title}</h3>
+                    <p className="font-vt323 text-[18px] text-ink/65 leading-snug">{desc}</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold mb-2">AI Chat Tutor</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ask anything about your document. Get clear, concise answers grounded
-                  in your course material — not generic web results.
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-                <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-950 flex items-center justify-center mb-4">
-                  <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold mb-2">Smart Flashcards</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Auto-generated from your notes. The most important concepts, distilled
-                  into bite-sized cards you can flip through anywhere.
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-                <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-950 flex items-center justify-center mb-4">
-                  <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold mb-2">Practice Quizzes</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Multiple-choice questions at varying difficulty levels with instant
-                  feedback and explanations to reinforce understanding.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* How it works */}
-        <section className="mx-auto max-w-5xl px-4 py-20">
+        {/* ── How it works ───────────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-4 py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Three steps to exam confidence</h2>
-            <p className="text-gray-500 dark:text-gray-400">From upload to ready in minutes.</p>
+            <h2 className="font-pixel text-[14px] leading-loose mb-3">HOW TO PLAY</h2>
+            <p className="font-vt323 text-xl text-ink/60">From upload to ready in minutes.</p>
           </div>
+
           <div className="grid gap-8 sm:grid-cols-3">
             {[
-              {
-                step: '01',
-                title: 'Upload your material',
-                desc: 'Drop in a PDF, DOCX, or PPTX — lecture notes, slides, or a past exam. Up to 20MB.',
-              },
-              {
-                step: '02',
-                title: 'Generate study tools',
-                desc: 'With one click, get an AI tutor, a deck of flashcards, and a personalized quiz.',
-              },
-              {
-                step: '03',
-                title: 'Study and ace it',
-                desc: 'Chat, flip cards, and drill quizzes. Your progress is saved as you go.',
-              },
+              { step: '01', title: 'UPLOAD', desc: 'Drop in a PDF, DOCX, or PPTX — lecture notes, slides, or a past exam. Up to 20MB.' },
+              { step: '02', title: 'GENERATE', desc: 'One click to create your AI tutor, flashcard deck, and a personalized quiz.' },
+              { step: '03', title: 'STUDY', desc: 'Chat, flip cards, and drill quizzes. Progress is auto-saved as you go.' },
             ].map(({ step, title, desc }) => (
-              <div key={step} className="flex gap-4">
-                <div className="text-3xl font-bold text-gray-200 dark:text-gray-800 shrink-0 leading-none mt-1">
-                  {step}
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">{title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
+              <div key={step} className="flex gap-4 items-start">
+                <div className="font-pixel text-[28px] leading-none text-ink/15 shrink-0 mt-1">{step}</div>
+                <div className="pixel-box p-4 flex-1">
+                  <h3 className="font-pixel text-[9px] mb-2 leading-loose">{title}</h3>
+                  <p className="font-vt323 text-[18px] text-ink/65 leading-snug">{desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Supported formats */}
-        <section className="border-t border-gray-200 dark:border-gray-800">
-          <div className="mx-auto max-w-5xl px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Supports</p>
-            <div className="flex gap-3">
-              {['PDF', 'DOCX', 'PPTX'].map((fmt) => (
-                <span
-                  key={fmt}
-                  className="rounded-md border border-gray-200 dark:border-gray-800 px-3 py-1 text-sm font-mono font-medium"
-                >
-                  {fmt}
-                </span>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Up to 20MB per file</p>
+        {/* ── Formats bar ────────────────────────────────────── */}
+        <section className="border-y-[3px] border-ink bg-surface">
+          <div className="mx-auto max-w-5xl px-4 py-6 flex items-center justify-center gap-8 flex-wrap">
+            <span className="font-pixel text-[9px] text-ink/50">ACCEPTS</span>
+            {['PDF', 'DOCX', 'PPTX'].map((f) => (
+              <span key={f} className="pixel-badge font-pixel text-[9px]">{f}</span>
+            ))}
+            <span className="font-pixel text-[9px] text-ink/50">MAX 20MB</span>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
-          <div className="mx-auto max-w-5xl px-4 py-20 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to ace your next exam?</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
-              Free to get started. No credit card required.
+        {/* ── CTA ────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-4 py-20 text-center">
+          <div className="pixel-box p-10 max-w-xl mx-auto" style={{ boxShadow: '6px 6px 0px var(--ink)' }}>
+            <div className="pixel-titlebar text-[10px] -mx-[3px] -mt-[3px] mb-6">
+              ★ READY TO PLAY? ★
+            </div>
+            <p className="font-vt323 text-xl text-ink/70 mb-8 leading-relaxed">
+              Free to get started. No credit card required.<br />
+              Your next exam isn't going to ace itself.
             </p>
-            <Link
-              href="/auth/signup"
-              className="rounded-md bg-blue-600 px-8 py-3 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Create a free account
+            <Link href="/auth/signup" className="pixel-btn pixel-btn-primary text-[10px]">
+              ▶ CREATE FREE ACCOUNT
             </Link>
           </div>
         </section>
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-800">
-        <div className="mx-auto max-w-5xl px-4 py-6 flex items-center justify-between text-sm text-gray-400">
-          <span className="font-medium text-foreground">WannaCram</span>
-          <span>© {new Date().getFullYear()}</span>
+      {/* ── Footer ─────────────────────────────────────────── */}
+      <footer className="border-t-[3px] border-ink bg-surface">
+        <div className="mx-auto max-w-5xl px-4 py-5 flex items-center justify-between">
+          <span className="font-pixel text-[10px]">WANNACRAM</span>
+          <span className="font-vt323 text-[18px] text-ink/50">© {new Date().getFullYear()}</span>
         </div>
       </footer>
 

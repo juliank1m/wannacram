@@ -9,53 +9,40 @@ import type { AIModel } from '@/types';
 
 type Mode = 'chat' | 'flashcards' | 'quiz';
 
-const TABS: { mode: Mode; label: string }[] = [
-  { mode: 'chat', label: 'Chat' },
-  { mode: 'flashcards', label: 'Flashcards' },
-  { mode: 'quiz', label: 'Quiz' },
+const TABS: { mode: Mode; label: string; icon: string }[] = [
+  { mode: 'chat',       label: 'CHAT',       icon: '💬' },
+  { mode: 'flashcards', label: 'CARDS',      icon: '🗂' },
+  { mode: 'quiz',       label: 'QUIZ',       icon: '✅' },
 ];
 
 const MODELS: { value: AIModel; label: string }[] = [
-  { value: 'claude-sonnet', label: 'Claude Sonnet' },
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  { value: 'claude-sonnet', label: 'CLAUDE' },
+  { value: 'gpt-4o-mini',   label: 'GPT-4O' },
 ];
 
-export default function StudyPage({
-  params,
-}: {
-  params: { docId: string };
-}) {
+export default function StudyPage({ params }: { params: { docId: string } }) {
   const [mode, setMode] = useState<Mode>('chat');
   const [model, setModel] = useState<AIModel>(() => {
-    try {
-      return (localStorage.getItem(`model-pref-${params.docId}`) as AIModel) ?? 'claude-sonnet';
-    } catch {
-      return 'claude-sonnet';
-    }
+    try { return (localStorage.getItem(`model-pref-${params.docId}`) as AIModel) ?? 'claude-sonnet'; }
+    catch { return 'claude-sonnet'; }
   });
-  const [title, setTitle] = useState<string>('');
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
     fetch('/api/documents')
-      .then((res) => res.json())
-      .then((data) => {
-        const doc = data.documents?.find(
-          (d: { id: string }) => d.id === params.docId
-        );
+      .then((r) => r.json())
+      .then((d) => {
+        const doc = d.documents?.find((x: { id: string }) => x.id === params.docId);
         if (doc) setTitle(doc.title);
       })
       .catch(() => {});
   }, [params.docId]);
 
-  // On leaving the document page: clear chat draft and reset quiz progress
+  // Flush transient state on page exit
   useEffect(() => {
     const docId = params.docId;
     return () => {
-      // Clear unsent chat draft from sessionStorage
       try { sessionStorage.removeItem(`chat-draft-${docId}`); } catch {}
-
-      // Reset quiz progress in DB (keep questions, reset position/score).
-      // keepalive: true lets the request complete even after the component unmounts.
       fetch('/api/sessions', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -69,48 +56,58 @@ export default function StudyPage({
     <>
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          {title ? (
-            <h1 className="text-xl font-bold truncate">{title}</h1>
-          ) : (
-            <div />
-          )}
-          <select
-            value={model}
-            onChange={(e) => {
-              const m = e.target.value as AIModel;
-              setModel(m);
-              try { localStorage.setItem(`model-pref-${params.docId}`, m); } catch {}
-            }}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {MODELS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+
+        {/* Document title + model selector */}
+        <div className="flex items-center justify-between mb-5 gap-4">
+          <div className="min-w-0">
+            {title && (
+              <h1 className="font-pixel text-[10px] leading-loose truncate text-ink/80">{title}</h1>
+            )}
+          </div>
+          <div className="shrink-0 flex items-center gap-2">
+            <span className="font-pixel text-[8px] text-ink/40">MODEL:</span>
+            <div className="flex border-[3px] border-ink overflow-hidden" style={{ boxShadow: '3px 3px 0 var(--ink)' }}>
+              {MODELS.map((m) => (
+                <button
+                  key={m.value}
+                  onClick={() => {
+                    setModel(m.value);
+                    try { localStorage.setItem(`model-pref-${params.docId}`, m.value); } catch {}
+                  }}
+                  className={`font-pixel text-[8px] px-3 py-2 transition-colors ${
+                    model === m.value
+                      ? 'bg-ink text-surface'
+                      : 'bg-surface text-ink/60 hover:bg-[var(--surface-alt)]'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex gap-1 border-b border-gray-200 dark:border-gray-800 mb-6">
-          {TABS.map(({ mode: tabMode, label }) => (
+        {/* Tab bar */}
+        <div className="flex border-[3px] border-ink mb-6 overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
+          {TABS.map(({ mode: tabMode, label, icon }) => (
             <button
               key={tabMode}
               onClick={() => setMode(tabMode)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 py-3 font-pixel text-[9px] transition-colors border-r-[3px] border-ink last:border-r-0 ${
                 mode === tabMode
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-foreground'
+                  ? 'bg-ink text-surface'
+                  : 'bg-surface text-ink/60 hover:bg-[var(--surface-alt)]'
               }`}
             >
-              {label}
+              <span>{icon}</span>
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>
 
-        {mode === 'chat' && <ChatInterface documentId={params.docId} model={model} />}
-        {mode === 'flashcards' && <FlashcardDeck documentId={params.docId} model={model} />}
-        {mode === 'quiz' && <QuizMode documentId={params.docId} model={model} />}
+        {mode === 'chat'       && <ChatInterface  documentId={params.docId} model={model} />}
+        {mode === 'flashcards' && <FlashcardDeck  documentId={params.docId} model={model} />}
+        {mode === 'quiz'       && <QuizMode       documentId={params.docId} model={model} />}
       </main>
     </>
   );

@@ -11,34 +11,28 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
   const [sessionLoading, setSessionLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Load session
   useEffect(() => {
     fetch(`/api/sessions?documentId=${documentId}&mode=chat`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.session?.messages) && data.session.messages.length > 0) {
-          setMessages(data.session.messages);
-        }
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.session?.messages) && d.session.messages.length > 0)
+          setMessages(d.session.messages);
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
   }, [documentId]);
 
-  // Restore unsent draft on mount
+  // Restore draft
   useEffect(() => {
-    try {
-      const draft = sessionStorage.getItem(`chat-draft-${documentId}`);
-      if (draft) setInput(draft);
-    } catch {}
+    try { const d = sessionStorage.getItem(`chat-draft-${documentId}`); if (d) setInput(d); } catch {}
   }, [documentId]);
 
-  // Persist draft on every keystroke
+  // Persist draft
   useEffect(() => {
     try {
-      if (input) {
-        sessionStorage.setItem(`chat-draft-${documentId}`, input);
-      } else {
-        sessionStorage.removeItem(`chat-draft-${documentId}`);
-      }
+      if (input) sessionStorage.setItem(`chat-draft-${documentId}`, input);
+      else sessionStorage.removeItem(`chat-draft-${documentId}`);
     } catch {}
   }, [input, documentId]);
 
@@ -55,9 +49,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
     setMessages(newMessages);
     setInput('');
     setStreaming(true);
-
-    const assistantMessage: Message = { role: 'assistant', content: '' };
-    setMessages([...newMessages, assistantMessage]);
+    setMessages([...newMessages, { role: 'assistant', content: '' }]);
 
     try {
       const res = await fetch('/api/chat', {
@@ -73,59 +65,38 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-
       if (!reader) throw new Error('No response body');
 
       let fullContent = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullContent += parsed.text;
-                setMessages([
-                  ...newMessages,
-                  { role: 'assistant', content: fullContent },
-                ]);
-              }
-              if (parsed.error) {
-                throw new Error(parsed.error);
-              }
-            } catch (e) {
-              if (e instanceof SyntaxError) continue;
-              throw e;
+        for (const line of decoder.decode(value, { stream: true }).split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.text) {
+              fullContent += parsed.text;
+              setMessages([...newMessages, { role: 'assistant', content: fullContent }]);
             }
-          }
+            if (parsed.error) throw new Error(parsed.error);
+          } catch (e) { if (e instanceof SyntaxError) continue; throw e; }
         }
       }
 
-      // Save completed conversation to DB (fire and forget)
-      const finalMessages: Message[] = [
-        ...newMessages,
-        { role: 'assistant', content: fullContent },
-      ];
+      const finalMessages: Message[] = [...newMessages, { role: 'assistant', content: fullContent }];
       fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId, mode: 'chat', data: finalMessages }),
       }).catch(() => {});
     } catch (err) {
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
-        },
-      ]);
+      setMessages([...newMessages, {
+        role: 'assistant',
+        content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
+      }]);
     } finally {
       setStreaming(false);
     }
@@ -133,34 +104,42 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
 
   if (sessionLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-14rem)]">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
+        <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
+        <p className="font-pixel text-[8px] text-ink/40 pixel-cursor">LOADING</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-14rem)]">
-      <div className="flex-1 overflow-y-auto space-y-4 pb-4">
+    <div className="flex flex-col h-[calc(100vh-18rem)]">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-4 pb-4 pr-1">
         {messages.length === 0 && (
-          <div className="text-center text-gray-400 dark:text-gray-500 mt-12">
-            <p className="text-lg mb-2">Ask anything about your document</p>
-            <p className="text-sm">
-              Try &quot;Summarize the key concepts&quot; or &quot;What are the main topics?&quot;
-            </p>
+          <div className="pixel-box p-0 max-w-md mx-auto mt-12 overflow-hidden">
+            <div className="pixel-titlebar text-[9px] text-center">READY TO STUDY</div>
+            <div className="p-6 text-center">
+              <p className="font-vt323 text-xl text-ink/55 leading-relaxed">
+                Ask anything about your document.<br />
+                Try &ldquo;Summarize the key concepts&rdquo; or<br />
+                &ldquo;What are the main topics?&rdquo;
+              </p>
+            </div>
           </div>
         )}
+
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {msg.role === 'assistant' && (
+              <div className="font-pixel text-[8px] text-[var(--px-blue)] mr-2 mt-2 shrink-0 self-start">AI</div>
+            )}
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${
+              className={`max-w-[80%] border-[3px] border-ink px-4 py-2 font-vt323 text-[19px] leading-snug ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-foreground'
+                  ? 'bg-[var(--px-blue)] text-white'
+                  : 'bg-surface text-ink'
               }`}
+              style={{ boxShadow: '3px 3px 0 var(--ink)' }}
             >
               {msg.role === 'user' ? (
                 <span className="whitespace-pre-wrap">{msg.content}</span>
@@ -168,31 +147,37 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
                 <MarkdownRenderer content={msg.content} />
               )}
               {streaming && i === messages.length - 1 && msg.role === 'assistant' && (
-                <span className="inline-block w-1.5 h-4 bg-current ml-0.5 animate-pulse" />
+                <span className="inline-block w-2 h-4 bg-current ml-0.5 animate-pulse" />
               )}
             </div>
+            {msg.role === 'user' && (
+              <div className="font-pixel text-[8px] text-ink/40 ml-2 mt-2 shrink-0 self-start">YOU</div>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-800">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about your document..."
-          disabled={streaming}
-          className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={streaming || !input.trim()}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          Send
-        </button>
-      </form>
+      {/* Input */}
+      <div className="pt-4 border-t-[3px] border-ink">
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask about your document..."
+            disabled={streaming}
+            className="pixel-input flex-1"
+          />
+          <button
+            type="submit"
+            disabled={streaming || !input.trim()}
+            className="pixel-btn pixel-btn-primary text-[9px] shrink-0"
+          >
+            {streaming ? '...' : 'SEND ▶'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

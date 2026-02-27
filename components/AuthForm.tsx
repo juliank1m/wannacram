@@ -21,29 +21,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     try {
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         });
         if (error) throw error;
-        setError('Check your email for a confirmation link.');
+        setError('CHECK YOUR EMAIL FOR A CONFIRMATION LINK.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         router.push('/dashboard');
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message.toUpperCase() : 'AN ERROR OCCURRED');
     } finally {
       setLoading(false);
     }
@@ -51,84 +45,83 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">
-            {mode === 'login' ? 'Sign in' : 'Create account'}
-          </h1>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            {mode === 'login'
-              ? 'Sign in to access your study materials'
-              : 'Get started with WannaCram'}
-          </p>
+      <div className="w-full max-w-sm">
+        {/* Title card */}
+        <div className="pixel-box overflow-hidden mb-0">
+          <div className="pixel-titlebar text-[10px] text-center">
+            WANNACRAM
+          </div>
+          <div className="p-8">
+            <h1 className="font-pixel text-[11px] leading-loose mb-1 text-center">
+              {mode === 'login' ? 'SIGN IN' : 'NEW PLAYER'}
+            </h1>
+            <p className="font-vt323 text-[18px] text-ink/55 text-center mb-7">
+              {mode === 'login' ? 'Enter your credentials to continue' : 'Create your WannaCram account'}
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="pixel-label">EMAIL ADDRESS</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pixel-input"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="pixel-label">PASSWORD</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="pixel-input"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && (
+                <div className="border-[3px] border-[var(--px-yellow)] bg-[var(--px-yellow)]/10 px-3 py-2">
+                  <p className="font-pixel text-[8px] text-[var(--px-yellow)] leading-relaxed">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="pixel-btn pixel-btn-primary w-full text-[10px] justify-center"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="pixel-spinner" style={{ width: 14, height: 14, borderWidth: 3 }} />
+                    LOADING...
+                  </span>
+                ) : mode === 'login' ? '▶ SIGN IN' : '▶ CREATE ACCOUNT'}
+              </button>
+            </form>
+
+            <hr className="pixel-divider mt-6 mb-5" />
+
+            <p className="font-vt323 text-[18px] text-center text-ink/55">
+              {mode === 'login' ? (
+                <>No account?{' '}
+                  <Link href="/auth/signup" className="text-[var(--px-blue)] hover:underline">Sign up</Link>
+                </>
+              ) : (
+                <>Have an account?{' '}
+                  <Link href="/auth/login" className="text-[var(--px-blue)] hover:underline">Sign in</Link>
+                </>
+              )}
+            </p>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading
-              ? 'Loading...'
-              : mode === 'login'
-              ? 'Sign in'
-              : 'Sign up'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-          {mode === 'login' ? (
-            <>
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/signup" className="text-blue-600 hover:underline">
-                Sign up
-              </Link>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-blue-600 hover:underline">
-                Sign in
-              </Link>
-            </>
-          )}
-        </p>
       </div>
     </div>
   );

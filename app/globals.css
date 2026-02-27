@@ -3,19 +3,224 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f0ece0;
+  --foreground: #1c1410;
+  --ink: #1c1410;
+  --surface: #fdf9f0;
+  --surface-alt: #e8e2d4;
+  --px-blue: #1d4ed8;
+  --px-yellow: #d97706;
+  --px-green: #15803d;
+  --px-red: #b91c1c;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  background-image: radial-gradient(circle, #c8c0aa 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  font-family: var(--font-vt323), monospace;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+* {
+  border-radius: 0 !important;
+}
+
+/* ── Pixel component system ─────────────────────────────── */
+
+@layer components {
+  /* Boxes / cards */
+  .pixel-box {
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0px var(--ink);
+    background: var(--surface);
+  }
+
+  .pixel-box-inset {
+    border: 3px solid var(--ink);
+    box-shadow: inset 2px 2px 0px var(--ink);
+    background: var(--surface);
+  }
+
+  /* Buttons */
+  .pixel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0px var(--ink);
+    font-family: var(--font-pixel), monospace;
+    font-size: 10px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: transform 0.06s, box-shadow 0.06s;
+    background: var(--surface);
+    color: var(--ink);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  .pixel-btn:hover:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--ink);
+  }
+
+  .pixel-btn:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px var(--ink);
+  }
+
+  .pixel-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .pixel-btn-primary {
+    background: var(--px-blue);
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  .pixel-btn-danger {
+    background: var(--px-red);
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  .pixel-btn-yellow {
+    background: var(--px-yellow);
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  .pixel-btn-green {
+    background: var(--px-green);
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  /* Inputs */
+  .pixel-input {
+    border: 3px solid var(--ink);
+    background: white;
+    font-family: var(--font-vt323), monospace;
+    font-size: 20px;
+    padding: 8px 12px;
+    width: 100%;
+    outline: none;
+    color: var(--ink);
+    transition: box-shadow 0.06s;
+    line-height: 1.3;
+  }
+
+  .pixel-input:focus {
+    box-shadow: 4px 4px 0px var(--px-blue);
+    border-color: var(--px-blue);
+  }
+
+  .pixel-input:disabled {
+    background: var(--surface-alt);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Labels */
+  .pixel-label {
+    display: block;
+    font-family: var(--font-pixel), monospace;
+    font-size: 9px;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Section dividers */
+  .pixel-divider {
+    border: none;
+    border-top: 3px solid var(--ink);
+    margin: 24px 0;
+  }
+
+  /* Tag / badge */
+  .pixel-badge {
+    display: inline-block;
+    border: 2px solid var(--ink);
+    font-family: var(--font-pixel), monospace;
+    font-size: 8px;
+    padding: 4px 8px;
+    background: var(--surface);
+    letter-spacing: 0.05em;
+  }
+
+  /* Dialog / panel title bar */
+  .pixel-titlebar {
+    border-bottom: 3px solid var(--ink);
+    padding: 10px 16px;
+    font-family: var(--font-pixel), monospace;
+    font-size: 10px;
+    background: var(--ink);
+    color: var(--surface);
+    letter-spacing: 0.05em;
+  }
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+
+@keyframes pixel-spin {
+  0%   { transform: rotate(0deg);   }
+  25%  { transform: rotate(90deg);  }
+  50%  { transform: rotate(180deg); }
+  75%  { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pixel-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes pixel-float {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-6px); }
+}
+
+.pixel-spinner {
+  width: 20px;
+  height: 20px;
+  border: 4px solid var(--ink);
+  border-top-color: transparent;
+  animation: pixel-spin 0.8s steps(4, end) infinite;
+  display: inline-block;
+}
+
+.pixel-cursor::after {
+  content: "█";
+  animation: pixel-blink 1s step-end infinite;
+}
+
+.pixel-float {
+  animation: pixel-float 2.4s ease-in-out infinite;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+
+::-webkit-scrollbar            { width: 10px; height: 10px; }
+::-webkit-scrollbar-track      { background: var(--surface-alt); border-left: 2px solid var(--ink); }
+::-webkit-scrollbar-thumb      { background: var(--ink); }
+::-webkit-scrollbar-thumb:hover { background: var(--px-blue); }
+
+/* ── Selection ───────────────────────────────────────────── */
+
+::selection {
+  background: var(--px-blue);
+  color: white;
+}
+
+/* ── Link focus ──────────────────────────────────────────── */
+
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--px-blue);
+  outline-offset: 2px;
 }
