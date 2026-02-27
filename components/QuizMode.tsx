@@ -122,7 +122,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[8px] text-ink/40 pixel-cursor">LOADING</p>
+        <p className="font-pixel text-[10px] text-ink/60 pixel-cursor">LOADING</p>
       </div>
     );
   }
@@ -186,7 +186,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     <div className="max-w-2xl mx-auto">
       {/* Progress */}
       <div className="mb-5">
-        <div className="flex justify-between font-pixel text-[8px] text-ink/50 mb-2">
+        <div className="flex justify-between font-pixel text-[10px] text-ink/70 mb-2">
           <span>Q{currentIndex + 1}/{questions.length}</span>
           <span>SCORE: {score}/{answered}</span>
         </div>
@@ -235,7 +235,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       {showExplanation && (
         <div className="pixel-box p-0 overflow-hidden mb-4"
              style={{ borderColor: selectedAnswer === q.answer ? 'var(--px-green)' : 'var(--px-red)', boxShadow: `4px 4px 0 ${selectedAnswer === q.answer ? 'var(--px-green)' : 'var(--px-red)'}` }}>
-          <div className="font-pixel text-[8px] px-3 py-2 border-b-[3px] border-inherit text-surface"
+          <div className="font-pixel text-[10px] px-3 py-2 border-b-[3px] border-inherit text-surface"
                style={{ background: selectedAnswer === q.answer ? 'var(--px-green)' : 'var(--px-red)' }}>
             {selectedAnswer === q.answer ? '✓ CORRECT!' : `✗ WRONG — ANSWER: ${q.answer}`}
           </div>

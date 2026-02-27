@@ -81,7 +81,7 @@ export default function FileUploader() {
               <div className="flex justify-center">
                 <div className="pixel-spinner" style={{ width: 32, height: 32, borderWidth: 5 }} />
               </div>
-              <p className="font-pixel text-[9px] text-ink/60 pixel-cursor">{progress}</p>
+              <p className="font-pixel text-[10px] text-ink/70 pixel-cursor">{progress}</p>
               {/* Pixel progress bar */}
               <div className="border-[3px] border-ink h-6 w-full mt-4 overflow-hidden">
                 <div className="h-full bg-[var(--px-blue)] animate-pulse" style={{ width: '60%' }} />
@@ -90,10 +90,11 @@ export default function FileUploader() {
           ) : (
             <>
               {/* Pixel file icon */}
-              <div className="font-pixel text-[32px] mb-4 select-none leading-none" aria-hidden>
-                📄
+              <div className="w-12 h-14 mx-auto mb-5 border-[3px] border-ink bg-surface flex items-center justify-center"
+                   style={{ boxShadow: '3px 3px 0 var(--ink)' }} aria-hidden>
+                <span className="font-pixel text-[9px] text-ink/60">FILE</span>
               </div>
-              <p className="font-vt323 text-xl text-ink/60 mb-5">
+              <p className="font-vt323 text-xl text-ink/75 mb-5">
                 Drag and drop your file here
               </p>
               <label className="pixel-btn pixel-btn-primary text-[9px] cursor-pointer">
@@ -110,7 +111,7 @@ export default function FileUploader() {
                   <span key={f} className="pixel-badge text-[8px]">{f}</span>
                 ))}
               </div>
-              <p className="font-vt323 text-[17px] text-ink/40 mt-3">MAX 20MB</p>
+              <p className="font-vt323 text-[18px] text-ink/60 mt-3">MAX 20MB</p>
             </>
           )}
         </div>

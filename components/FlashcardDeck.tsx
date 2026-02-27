@@ -60,7 +60,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[8px] text-ink/40 pixel-cursor">LOADING</p>
+        <p className="font-pixel text-[10px] text-ink/60 pixel-cursor">LOADING</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
     <div className="flex flex-col items-center h-[calc(100vh-18rem)]">
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-4">
-        <div className="flex justify-between font-pixel text-[8px] text-ink/50 mb-2">
+        <div className="flex justify-between font-pixel text-[10px] text-ink/70 mb-2">
           <span>CARD {currentIndex + 1} OF {flashcards.length}</span>
           <span>{progress}%</span>
         </div>
@@ -136,8 +136,8 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
             className="font-vt323 text-xl text-center w-full"
           />
         </div>
-        <div className="absolute bottom-2 right-3 font-pixel text-[7px] text-ink/30">
-          {flipped ? 'CLICK TO FLIP ↺' : 'CLICK TO REVEAL →'}
+        <div className="absolute bottom-2 right-3 font-pixel text-[9px] text-ink/50">
+          {flipped ? 'CLICK TO FLIP' : 'CLICK TO REVEAL'}
         </div>
       </div>
 

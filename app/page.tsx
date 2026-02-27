@@ -46,7 +46,7 @@ export default async function HomePage() {
             <span className="text-[var(--px-blue)]">STUDY GAME</span>
           </h1>
 
-          <p className="font-vt323 text-2xl text-ink/70 max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="font-vt323 text-2xl text-ink/85 max-w-xl mx-auto mb-10 leading-relaxed">
             Upload your lecture notes, slides, or past exams.
             WannaCram generates flashcards, quizzes, and
             an AI tutor trained on your actual course material.
@@ -74,42 +74,39 @@ export default async function HomePage() {
           <div className="mx-auto max-w-5xl px-4 py-16">
             <div className="text-center mb-12">
               <h2 className="font-pixel text-[14px] leading-loose mb-3">3 WAYS TO STUDY</h2>
-              <p className="font-vt323 text-xl text-ink/60">All powered by AI. All built from your own material.</p>
+              <p className="font-vt323 text-xl text-ink/80">All powered by AI. All built from your own material.</p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-3">
               {[
                 {
-                  icon: '💬',
                   tag: 'MODE 1',
                   title: 'AI TUTOR',
                   desc: 'Ask anything about your document. Get answers grounded in your course material — not generic search results.',
                   color: 'var(--px-blue)',
                 },
                 {
-                  icon: '🗂',
                   tag: 'MODE 2',
                   title: 'FLASHCARDS',
                   desc: 'Auto-generated from your notes. Key concepts distilled into cards you can flip through anywhere.',
                   color: 'var(--px-yellow)',
                 },
                 {
-                  icon: '✅',
                   tag: 'MODE 3',
                   title: 'PRACTICE QUIZ',
                   desc: 'Multiple-choice questions at varying difficulty. Instant feedback and explanations to lock in knowledge.',
                   color: 'var(--px-green)',
                 },
-              ].map(({ icon, tag, title, desc, color }) => (
+              ].map(({ tag, title, desc, color }) => (
                 <div key={title} className="pixel-box p-0 overflow-hidden">
-                  <div className="font-pixel text-[8px] px-4 py-2 border-b-[3px] border-ink text-white"
+                  <div className="font-pixel text-[9px] px-4 py-2 border-b-[3px] border-ink text-white"
                        style={{ background: color }}>
                     {tag}
                   </div>
                   <div className="p-5">
-                    <div className="text-3xl mb-3">{icon}</div>
-                    <h3 className="font-pixel text-[10px] mb-3 leading-loose">{title}</h3>
-                    <p className="font-vt323 text-[18px] text-ink/65 leading-snug">{desc}</p>
+                    <div className="w-8 h-8 mb-4 border-[3px] border-ink" style={{ background: color }} />
+                    <h3 className="font-pixel text-[11px] mb-3 leading-loose">{title}</h3>
+                    <p className="font-vt323 text-xl text-ink/80 leading-snug">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -121,7 +118,7 @@ export default async function HomePage() {
         <section className="mx-auto max-w-5xl px-4 py-16">
           <div className="text-center mb-12">
             <h2 className="font-pixel text-[14px] leading-loose mb-3">HOW TO PLAY</h2>
-            <p className="font-vt323 text-xl text-ink/60">From upload to ready in minutes.</p>
+            <p className="font-vt323 text-xl text-ink/80">From upload to ready in minutes.</p>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3">
@@ -131,10 +128,10 @@ export default async function HomePage() {
               { step: '03', title: 'STUDY', desc: 'Chat, flip cards, and drill quizzes. Progress is auto-saved as you go.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="flex gap-4 items-start">
-                <div className="font-pixel text-[28px] leading-none text-ink/15 shrink-0 mt-1">{step}</div>
+                <div className="font-pixel text-[28px] leading-none text-ink/20 shrink-0 mt-1">{step}</div>
                 <div className="pixel-box p-4 flex-1">
-                  <h3 className="font-pixel text-[9px] mb-2 leading-loose">{title}</h3>
-                  <p className="font-vt323 text-[18px] text-ink/65 leading-snug">{desc}</p>
+                  <h3 className="font-pixel text-[11px] mb-2 leading-loose">{title}</h3>
+                  <p className="font-vt323 text-xl text-ink/80 leading-snug">{desc}</p>
                 </div>
               </div>
             ))}
@@ -158,7 +155,7 @@ export default async function HomePage() {
             <div className="pixel-titlebar text-[10px] -mx-[3px] -mt-[3px] mb-6">
               ★ READY TO PLAY? ★
             </div>
-            <p className="font-vt323 text-xl text-ink/70 mb-8 leading-relaxed">
+            <p className="font-vt323 text-xl text-ink/80 mb-8 leading-relaxed">
               Free to get started. No credit card required.<br />
               Your next exam isn't going to ace itself.
             </p>

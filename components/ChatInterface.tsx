@@ -106,7 +106,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
-        <p className="font-pixel text-[8px] text-ink/40 pixel-cursor">LOADING</p>
+        <p className="font-pixel text-[10px] text-ink/60 pixel-cursor">LOADING</p>
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="font-pixel text-[8px] text-[var(--px-blue)] mr-2 mt-2 shrink-0 self-start">AI</div>
+              <div className="font-pixel text-[10px] text-[var(--px-blue)] mr-2 mt-2 shrink-0 self-start">AI</div>
             )}
             <div
               className={`max-w-[80%] border-[3px] border-ink px-4 py-2 font-vt323 text-[19px] leading-snug ${
@@ -151,7 +151,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
               )}
             </div>
             {msg.role === 'user' && (
-              <div className="font-pixel text-[8px] text-ink/40 ml-2 mt-2 shrink-0 self-start">YOU</div>
+              <div className="font-pixel text-[10px] text-ink/60 ml-2 mt-2 shrink-0 self-start">YOU</div>
             )}
           </div>
         ))}

@@ -55,7 +55,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <h1 className="font-pixel text-[11px] leading-loose mb-1 text-center">
               {mode === 'login' ? 'SIGN IN' : 'NEW PLAYER'}
             </h1>
-            <p className="font-vt323 text-[18px] text-ink/55 text-center mb-7">
+            <p className="font-vt323 text-[18px] text-ink/75 text-center mb-7">
               {mode === 'login' ? 'Enter your credentials to continue' : 'Create your WannaCram account'}
             </p>
 
@@ -89,7 +89,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
               {error && (
                 <div className="border-[3px] border-[var(--px-yellow)] bg-[var(--px-yellow)]/10 px-3 py-2">
-                  <p className="font-pixel text-[8px] text-[var(--px-yellow)] leading-relaxed">{error}</p>
+                  <p className="font-pixel text-[10px] text-[var(--px-yellow)] leading-relaxed">{error}</p>
                 </div>
               )}
 
@@ -109,7 +109,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
             <hr className="pixel-divider mt-6 mb-5" />
 
-            <p className="font-vt323 text-[18px] text-center text-ink/55">
+            <p className="font-vt323 text-[18px] text-center text-ink/75">
               {mode === 'login' ? (
                 <>No account?{' '}
                   <Link href="/auth/signup" className="text-[var(--px-blue)] hover:underline">Sign up</Link>

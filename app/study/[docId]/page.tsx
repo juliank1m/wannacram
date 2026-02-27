@@ -9,10 +9,10 @@ import type { AIModel } from '@/types';
 
 type Mode = 'chat' | 'flashcards' | 'quiz';
 
-const TABS: { mode: Mode; label: string; icon: string }[] = [
-  { mode: 'chat',       label: 'CHAT',       icon: '💬' },
-  { mode: 'flashcards', label: 'CARDS',      icon: '🗂' },
-  { mode: 'quiz',       label: 'QUIZ',       icon: '✅' },
+const TABS: { mode: Mode; label: string }[] = [
+  { mode: 'chat',       label: 'CHAT'  },
+  { mode: 'flashcards', label: 'CARDS' },
+  { mode: 'quiz',       label: 'QUIZ'  },
 ];
 
 const MODELS: { value: AIModel; label: string }[] = [
@@ -65,7 +65,7 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
             )}
           </div>
           <div className="shrink-0 flex items-center gap-2">
-            <span className="font-pixel text-[8px] text-ink/40">MODEL:</span>
+            <span className="font-pixel text-[10px] text-ink/60">MODEL:</span>
             <div className="flex border-[3px] border-ink overflow-hidden" style={{ boxShadow: '3px 3px 0 var(--ink)' }}>
               {MODELS.map((m) => (
                 <button
@@ -74,10 +74,10 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
                     setModel(m.value);
                     try { localStorage.setItem(`model-pref-${params.docId}`, m.value); } catch {}
                   }}
-                  className={`font-pixel text-[8px] px-3 py-2 transition-colors ${
+                  className={`font-pixel text-[10px] px-3 py-2 transition-colors ${
                     model === m.value
                       ? 'bg-ink text-surface'
-                      : 'bg-surface text-ink/60 hover:bg-[var(--surface-alt)]'
+                      : 'bg-surface text-ink/70 hover:bg-[var(--surface-alt)]'
                   }`}
                 >
                   {m.label}
@@ -89,18 +89,17 @@ export default function StudyPage({ params }: { params: { docId: string } }) {
 
         {/* Tab bar */}
         <div className="flex border-[3px] border-ink mb-6 overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
-          {TABS.map(({ mode: tabMode, label, icon }) => (
+          {TABS.map(({ mode: tabMode, label }) => (
             <button
               key={tabMode}
               onClick={() => setMode(tabMode)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 font-pixel text-[9px] transition-colors border-r-[3px] border-ink last:border-r-0 ${
+              className={`flex-1 flex items-center justify-center py-3 font-pixel text-[11px] transition-colors border-r-[3px] border-ink last:border-r-0 ${
                 mode === tabMode
                   ? 'bg-ink text-surface'
-                  : 'bg-surface text-ink/60 hover:bg-[var(--surface-alt)]'
+                  : 'bg-surface text-ink/70 hover:bg-[var(--surface-alt)]'
               }`}
             >
-              <span>{icon}</span>
-              <span className="hidden sm:inline">{label}</span>
+              {label}
             </button>
           ))}
         </div>

@@ -63,11 +63,11 @@ export default function Header() {
 
         <nav className="flex items-center gap-5">
           <Link href="/dashboard"
-                className="font-pixel text-[9px] text-ink/70 hover:text-ink transition-colors tracking-wide">
+                className="font-pixel text-[11px] text-ink/70 hover:text-ink transition-colors tracking-wide">
             DOCS
           </Link>
           <Link href="/upload"
-                className="font-pixel text-[9px] text-ink/70 hover:text-ink transition-colors tracking-wide">
+                className="font-pixel text-[11px] text-ink/70 hover:text-ink transition-colors tracking-wide">
             UPLOAD
           </Link>
 

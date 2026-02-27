@@ -17,8 +17,8 @@
 body {
   color: var(--foreground);
   background-color: var(--background);
-  background-image: radial-gradient(circle, #c8c0aa 1.5px, transparent 1.5px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle, #ccc4ae 1px, transparent 1px);
+  background-size: 28px 28px;
   font-family: var(--font-vt323), monospace;
   font-size: 20px;
   line-height: 1.4;
@@ -131,7 +131,7 @@ body {
   .pixel-label {
     display: block;
     font-family: var(--font-pixel), monospace;
-    font-size: 9px;
+    font-size: 10px;
     margin-bottom: 8px;
     letter-spacing: 0.05em;
   }

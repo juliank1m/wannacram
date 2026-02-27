@@ -74,16 +74,16 @@ export default function DashboardPage() {
                       <h2 className="font-pixel text-[9px] leading-relaxed line-clamp-2 flex-1">
                         {doc.title}
                       </h2>
-                      <span className="pixel-badge text-[7px] shrink-0"
+                      <span className="pixel-badge text-[9px] shrink-0"
                             style={{ background: FILE_TYPE_COLORS[doc.file_type], color: 'white', borderColor: 'var(--ink)' }}>
                         {FILE_TYPE_LABELS[doc.file_type] ?? doc.file_type}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <p className="font-vt323 text-[16px] text-ink/50">
+                      <p className="font-vt323 text-[18px] text-ink/65">
                         {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <span className="font-pixel text-[8px] text-[var(--px-blue)] group-hover:text-ink transition-colors">
+                      <span className="font-pixel text-[10px] text-[var(--px-blue)] group-hover:text-ink transition-colors">
                         STUDY ▶
                       </span>
                     </div>

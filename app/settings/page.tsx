@@ -121,7 +121,7 @@ export default function SettingsPage() {
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-pixel text-[14px] leading-loose mb-1">SETTINGS</h1>
-        <p className="font-vt323 text-xl text-ink/55 mb-7">Manage your profile and account.</p>
+        <p className="font-vt323 text-xl text-ink/75 mb-7">Manage your profile and account.</p>
 
         {/* Profile */}
         <PixelSection title="▶ PLAYER PROFILE">
@@ -132,8 +132,8 @@ export default function SettingsPage() {
             </div>
             <div>
               <p className="font-pixel text-[10px] leading-loose">{profile.displayName ?? profile.email.split('@')[0]}</p>
-              <p className="font-vt323 text-[18px] text-ink/55">{profile.email}</p>
-              <p className="font-vt323 text-[16px] text-ink/40 mt-1">
+              <p className="font-vt323 text-[18px] text-ink/70">{profile.email}</p>
+              <p className="font-vt323 text-[16px] text-ink/60 mt-1">
                 {profile.documentCount} doc{profile.documentCount !== 1 ? 's' : ''} · joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
               </p>
             </div>
@@ -146,7 +146,7 @@ export default function SettingsPage() {
             <div>
               <label className="pixel-label">EMAIL</label>
               <input type="email" value={profile.email} disabled className="pixel-input" />
-              <p className="font-vt323 text-[16px] text-ink/40 mt-1">Email cannot be changed.</p>
+              <p className="font-vt323 text-[16px] text-ink/60 mt-1">Email cannot be changed.</p>
             </div>
             {profileMsg && <Msg type={profileMsg.type} text={profileMsg.text} />}
             <button type="submit" disabled={savingProfile || !displayName.trim()} className="pixel-btn pixel-btn-primary text-[9px]">
