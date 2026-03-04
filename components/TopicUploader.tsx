@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
 const ACCEPTED_TYPES = [
   'application/pdf',
@@ -69,22 +70,47 @@ export default function TopicUploader() {
       return;
     }
     setUploading(true);
-    setUploadProgress(`UPLOADING ${file.name.toUpperCase()}...`);
+
+    const supabase = createClient();
+    let filePath: string | null = null;
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      // 1. Get the current user's ID for the storage path
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // 2. Upload directly from browser to Supabase Storage (bypasses Vercel size limits)
+      filePath = `${user.id}/${Date.now()}-${file.name}`;
+      setUploadProgress(`UPLOADING ${file.name.toUpperCase()}...`);
+      const { error: storageError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, { contentType: file.type });
+      if (storageError) throw new Error(storageError.message || 'Storage upload failed');
+
+      // 3. Tell the API to extract text and save metadata (tiny JSON payload)
+      setUploadProgress(`PROCESSING ${file.name.toUpperCase()}...`);
       const res = await fetch(`/api/topics/${topicId}/documents`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filePath,
+          fileName: file.name,
+          fileType: file.type,
+        }),
       });
       if (!res.ok) {
-        let msg = 'Upload failed';
+        let msg = 'Processing failed';
         try { const data = await res.json(); msg = data.error || msg; } catch {}
         throw new Error(msg);
       }
       const data = await res.json();
       setUploadedDocs((prev) => [...prev, data.document]);
     } catch (err) {
+      // Clean up orphaned storage file if API call failed after upload succeeded
+      if (filePath) {
+        const supabaseCleanup = createClient();
+        supabaseCleanup.storage.from('documents').remove([filePath]).catch(() => {});
+      }
       setUploadError(err instanceof Error ? err.message.toUpperCase() : 'UPLOAD FAILED');
     } finally {
       setUploading(false);

@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import FlashcardDeck from '@/components/FlashcardDeck';
 import QuizMode from '@/components/QuizMode';
+import TopicFilesPanel from '@/components/TopicFilesPanel';
 import type { AIModel } from '@/types';
 
 type Mode = 'chat' | 'flashcards' | 'quiz';
@@ -31,6 +32,7 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
     } catch {}
   }, [params.topicId]);
   const [title, setTitle] = useState('');
+  const [filesOpen, setFilesOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/topics/${params.topicId}`)
@@ -62,7 +64,13 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
               <h1 className="font-pixelify font-bold text-[16px] truncate text-ink/85">{title}</h1>
             )}
           </div>
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-3">
+            <button
+              onClick={() => setFilesOpen(true)}
+              className="pixel-btn text-[11px]"
+            >
+              FILES
+            </button>
             <span className="font-pixelify font-semibold text-[14px] text-ink/60">Model:</span>
             <div className="flex border-[3px] border-ink overflow-hidden" style={{ boxShadow: '3px 3px 0 var(--ink)' }}>
               {MODELS.map((m) => (
@@ -107,6 +115,7 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
           {mode === 'quiz'       && <QuizMode       topicId={params.topicId} model={model} />}
         </div>
       </main>
+      <TopicFilesPanel topicId={params.topicId} isOpen={filesOpen} onClose={() => setFilesOpen(false)} />
     </div>
   );
 }

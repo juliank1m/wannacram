@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase-server';
-import { extractText, getFileType, validateFileSize } from '@/lib/parsers';
+import { extractText, getFileType } from '@/lib/parsers';
 
-// POST /api/topics/[topicId]/documents — upload a file and attach it to the topic
+// POST /api/topics/[topicId]/documents
+// Body: { filePath: string, fileName: string, fileType: string }
+// File is already in Supabase Storage (uploaded directly by the browser).
+// This route downloads it, extracts text, saves metadata, and links to the topic.
 export async function POST(
   request: Request,
   { params }: { params: { topicId: string } }
@@ -24,11 +27,17 @@ export async function POST(
       return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
     }
 
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    const { filePath, fileName } = await request.json();
+    if (!filePath || !fileName) {
+      return NextResponse.json({ error: 'Missing filePath or fileName' }, { status: 400 });
+    }
 
-    const fileType = getFileType(file.name);
+    // Verify the storage path is owned by this user (must start with their user ID)
+    if (!filePath.startsWith(`${user.id}/`)) {
+      return NextResponse.json({ error: 'Invalid file path' }, { status: 403 });
+    }
+
+    const fileType = getFileType(fileName);
     if (!fileType) {
       return NextResponse.json(
         { error: 'Unsupported file type. Please upload PDF, DOCX, or PPTX.' },
@@ -36,37 +45,31 @@ export async function POST(
       );
     }
 
-    if (!validateFileSize(file.size)) {
+    const serviceClient = createServiceRoleClient();
+
+    // Download from Supabase Storage to extract text
+    const { data: fileData, error: downloadError } = await serviceClient.storage
+      .from('documents')
+      .download(filePath);
+
+    if (downloadError || !fileData) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 20MB.' },
-        { status: 400 }
+        { error: 'Failed to retrieve uploaded file from storage' },
+        { status: 500 }
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const buffer = Buffer.from(await fileData.arrayBuffer());
 
     let extractedText: string;
     try {
       extractedText = await extractText(buffer, fileType);
     } catch (err) {
+      // Clean up storage if text extraction fails
+      await serviceClient.storage.from('documents').remove([filePath]);
       return NextResponse.json(
         { error: err instanceof Error ? err.message : 'Failed to extract text from file' },
         { status: 422 }
-      );
-    }
-
-    const serviceClient = createServiceRoleClient();
-
-    // Upload to Supabase Storage
-    const filePath = `${user.id}/${Date.now()}-${file.name}`;
-    const { error: storageError } = await serviceClient.storage
-      .from('documents')
-      .upload(filePath, buffer, { contentType: file.type });
-
-    if (storageError) {
-      return NextResponse.json(
-        { error: storageError.message || 'Failed to upload file to storage' },
-        { status: 500 }
       );
     }
 
@@ -75,7 +78,7 @@ export async function POST(
       .from('documents')
       .insert({
         user_id: user.id,
-        title: file.name.replace(/\.[^/.]+$/, ''),
+        title: fileName.replace(/\.[^/.]+$/, ''),
         file_path: filePath,
         extracted_text: extractedText,
         file_type: fileType,
