@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Message, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 
-export default function ChatInterface({ documentId, model }: { documentId: string; model: AIModel }) {
+export default function ChatInterface({ topicId, model }: { topicId: string; model: AIModel }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -13,7 +13,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
 
   // Load session
   useEffect(() => {
-    fetch(`/api/sessions?documentId=${documentId}&mode=chat`)
+    fetch(`/api/sessions?topicId=${topicId}&mode=chat`)
       .then((r) => r.json())
       .then((d) => {
         if (Array.isArray(d.session?.messages) && d.session.messages.length > 0)
@@ -21,20 +21,20 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
-  }, [documentId]);
+  }, [topicId]);
 
   // Restore draft
   useEffect(() => {
-    try { const d = sessionStorage.getItem(`chat-draft-${documentId}`); if (d) setInput(d); } catch {}
-  }, [documentId]);
+    try { const d = sessionStorage.getItem(`chat-draft-${topicId}`); if (d) setInput(d); } catch {}
+  }, [topicId]);
 
   // Persist draft
   useEffect(() => {
     try {
-      if (input) sessionStorage.setItem(`chat-draft-${documentId}`, input);
-      else sessionStorage.removeItem(`chat-draft-${documentId}`);
+      if (input) sessionStorage.setItem(`chat-draft-${topicId}`, input);
+      else sessionStorage.removeItem(`chat-draft-${topicId}`);
     } catch {}
-  }, [input, documentId]);
+  }, [input, topicId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -55,7 +55,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, messages: newMessages, model }),
+        body: JSON.stringify({ topicId, messages: newMessages, model }),
       });
 
       if (!res.ok) {
@@ -90,7 +90,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, mode: 'chat', data: finalMessages }),
+        body: JSON.stringify({ topicId, mode: 'chat', data: finalMessages }),
       }).catch(() => {});
     } catch (err) {
       setMessages([...newMessages, {
@@ -120,7 +120,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
             <div className="pixel-titlebar text-center">READY TO STUDY</div>
             <div className="p-6 text-center">
               <p className="font-vt323 text-xl text-ink/55 leading-relaxed">
-                Ask anything about your document.<br />
+                Ask anything about your topic.<br />
                 Try &ldquo;Summarize the key concepts&rdquo; or<br />
                 &ldquo;What are the main topics?&rdquo;
               </p>
@@ -165,7 +165,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your document..."
+            placeholder="Ask about your topic..."
             disabled={streaming}
             className="pixel-input flex-1"
           />

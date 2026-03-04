@@ -14,15 +14,15 @@ interface QuizState {
   showExplanation: boolean;
 }
 
-function saveQuizState(documentId: string, state: QuizState) {
+function saveQuizState(topicId: string, state: QuizState) {
   fetch('/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ documentId, mode: 'quiz', data: state }),
+    body: JSON.stringify({ topicId, mode: 'quiz', data: state }),
   }).catch(() => {});
 }
 
-export default function QuizMode({ documentId, model }: { documentId: string; model: AIModel }) {
+export default function QuizMode({ topicId, model }: { topicId: string; model: AIModel }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
   const [sessionLoading, setSessionLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/sessions?documentId=${documentId}&mode=quiz`)
+    fetch(`/api/sessions?topicId=${topicId}&mode=quiz`)
       .then((r) => r.json())
       .then((d) => {
         const saved: QuizState | undefined = d.session?.messages;
@@ -53,7 +53,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
-  }, [documentId]);
+  }, [topicId]);
 
   const generate = async () => {
     setLoading(true);
@@ -62,7 +62,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       const res = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, model }),
+        body: JSON.stringify({ topicId, model }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed');
       const data = await res.json();
@@ -74,7 +74,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setScore(0);
       setAnswered(0);
       setQuizComplete(false);
-      saveQuizState(documentId, { questions: data.questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
+      saveQuizState(topicId, { questions: data.questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -92,7 +92,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     setShowExplanation(true);
     setScore(newScore);
     setAnswered(newAnswered);
-    saveQuizState(documentId, { questions, currentIndex, score: newScore, answered: newAnswered, quizComplete: false, selectedAnswer: letter, showExplanation: true });
+    saveQuizState(topicId, { questions, currentIndex, score: newScore, answered: newAnswered, quizComplete: false, selectedAnswer: letter, showExplanation: true });
   };
 
   const nextQuestion = () => {
@@ -101,10 +101,10 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setCurrentIndex(newIndex);
       setSelectedAnswer(null);
       setShowExplanation(false);
-      saveQuizState(documentId, { questions, currentIndex: newIndex, score, answered, quizComplete: false, selectedAnswer: null, showExplanation: false });
+      saveQuizState(topicId, { questions, currentIndex: newIndex, score, answered, quizComplete: false, selectedAnswer: null, showExplanation: false });
     } else {
       setQuizComplete(true);
-      saveQuizState(documentId, { questions, currentIndex, score, answered, quizComplete: true, selectedAnswer, showExplanation });
+      saveQuizState(topicId, { questions, currentIndex, score, answered, quizComplete: true, selectedAnswer, showExplanation });
     }
   };
 
@@ -115,7 +115,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     setScore(0);
     setAnswered(0);
     setQuizComplete(false);
-    saveQuizState(documentId, { questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
+    saveQuizState(topicId, { questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
   };
 
   if (sessionLoading) {
@@ -134,7 +134,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
           <div className="pixel-titlebar text-center">QUIZ MODE</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
-              Generate a quiz from your document to test your knowledge
+              Generate a quiz from your topic to test your knowledge
             </p>
             <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
               {loading ? (

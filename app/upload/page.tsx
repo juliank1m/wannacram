@@ -1,5 +1,6 @@
+import { Suspense } from 'react';
 import Header from '@/components/Header';
-import FileUploader from '@/components/FileUploader';
+import TopicUploader from '@/components/TopicUploader';
 
 export default function UploadPage() {
   return (
@@ -7,12 +8,14 @@ export default function UploadPage() {
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-12">
         <div className="text-center mb-10">
-          <h1 className="font-pixel text-[14px] leading-loose mb-2">UPLOAD MATERIAL</h1>
+          <h1 className="font-pixel text-[14px] leading-loose mb-2">CREATE TOPIC</h1>
           <p className="font-vt323 text-xl text-ink/55">
-            Upload your lecture notes, slides, or past exams to get started
+            Name your topic and upload all related study materials
           </p>
         </div>
-        <FileUploader />
+        <Suspense>
+          <TopicUploader />
+        </Suspense>
       </main>
     </>
   );

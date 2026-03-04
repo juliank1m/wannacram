@@ -1,50 +1,29 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { CHAT_SYSTEM_PROMPT, streamChat } from '@/lib/ai';
+import { getTopicText } from '@/lib/topics';
 import { getUserFriendlyAiError } from '@/lib/error-messages';
 import type { Message, AIModel } from '@/types';
 
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { documentId, messages, model = 'claude-sonnet' } = (await request.json()) as {
-      documentId: string;
+    const { topicId, messages, model = 'claude-sonnet' } = (await request.json()) as {
+      topicId: string;
       messages: Message[];
       model?: AIModel;
     };
 
-    if (!documentId || !messages?.length) {
-      return NextResponse.json(
-        { error: 'Missing documentId or messages' },
-        { status: 400 }
-      );
+    if (!topicId || !messages?.length) {
+      return NextResponse.json({ error: 'Missing topicId or messages' }, { status: 400 });
     }
 
-    const { data: doc, error: dbError } = await supabase
-      .from('documents')
-      .select('extracted_text')
-      .eq('id', documentId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (dbError || !doc) {
-      return NextResponse.json(
-        { error: 'Document not found' },
-        { status: 404 }
-      );
-    }
-
-    let extractedText = doc.extracted_text;
-    if (extractedText.length > 150000) {
-      extractedText = extractedText.slice(0, 150000);
+    const extractedText = await getTopicText(topicId, user.id);
+    if (!extractedText) {
+      return NextResponse.json({ error: 'Topic not found or has no documents' }, { status: 404 });
     }
 
     const readable = streamChat(model, CHAT_SYSTEM_PROMPT(extractedText), messages);
@@ -58,9 +37,6 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error('Chat route error:', err);
-    return NextResponse.json(
-      { error: getUserFriendlyAiError(err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: getUserFriendlyAiError(err) }, { status: 500 });
   }
 }

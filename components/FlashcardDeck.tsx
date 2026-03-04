@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import type { Flashcard, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 
-export default function FlashcardDeck({ documentId, model }: { documentId: string; model: AIModel }) {
+export default function FlashcardDeck({ topicId, model }: { topicId: string; model: AIModel }) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -14,7 +14,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
   const [sessionLoading, setSessionLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/sessions?documentId=${documentId}&mode=flashcards`)
+    fetch(`/api/sessions?topicId=${topicId}&mode=flashcards`)
       .then((r) => r.json())
       .then((d) => {
         const saved = d.session?.messages?.flashcards;
@@ -25,7 +25,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
-  }, [documentId]);
+  }, [topicId]);
 
   const generate = async () => {
     setLoading(true);
@@ -34,7 +34,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
       const res = await fetch('/api/flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, model }),
+        body: JSON.stringify({ topicId, model }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed');
       const data = await res.json();
@@ -45,7 +45,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
       fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, mode: 'flashcards', data: { flashcards: data.flashcards } }),
+        body: JSON.stringify({ topicId, mode: 'flashcards', data: { flashcards: data.flashcards } }),
       }).catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -72,7 +72,7 @@ export default function FlashcardDeck({ documentId, model }: { documentId: strin
           <div className="pixel-titlebar text-center">FLASHCARDS</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
-              Generate flashcards from your document to start studying
+              Generate flashcards from your topic to start studying
             </p>
             <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
               {loading ? (
