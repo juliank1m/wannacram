@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, VT323, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 const pressStart = Press_Start_2P({
   weight: "400",

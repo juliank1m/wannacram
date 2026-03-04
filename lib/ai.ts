@@ -21,8 +21,9 @@ parts of the material. If asked, generate practice questions or summaries.
 
 Use markdown formatting to improve clarity: headers (##, ###) to organize long responses,
 **bold** for key terms, *italics* for emphasis, bullet or numbered lists for enumerations,
-and fenced code blocks for any code, formulas, or technical syntax — always include the language
-identifier (e.g. \`\`\`python, \`\`\`java, \`\`\`sql). Keep responses focused.
+and fenced code blocks for any code or technical syntax — always include the language
+identifier (e.g. \`\`\`python, \`\`\`java, \`\`\`sql). For mathematical expressions, use
+LaTeX math notation: $...$ for inline math and $$...$$ for display equations. Keep responses focused.
 
 COURSE MATERIAL:
 ${extractedText}`;
