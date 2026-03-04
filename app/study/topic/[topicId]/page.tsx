@@ -22,10 +22,14 @@ const MODELS: { value: AIModel; label: string }[] = [
 
 export default function TopicStudyPage({ params }: { params: { topicId: string } }) {
   const [mode, setMode] = useState<Mode>('chat');
-  const [model, setModel] = useState<AIModel>(() => {
-    try { return (localStorage.getItem(`model-pref-topic-${params.topicId}`) as AIModel) ?? 'claude-sonnet'; }
-    catch { return 'claude-sonnet'; }
-  });
+  const [model, setModel] = useState<AIModel>('claude-sonnet');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`model-pref-topic-${params.topicId}`) as AIModel;
+      if (saved) setModel(saved);
+    } catch {}
+  }, [params.topicId]);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
@@ -49,10 +53,10 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
   }, [params.topicId]);
 
   return (
-    <>
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
       <Header />
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        <div className="flex items-center justify-between mb-5 gap-4">
+      <main className="flex-1 min-h-0 flex flex-col mx-auto w-full max-w-5xl px-4 pt-6 pb-4">
+        <div className="flex items-center justify-between mb-5 gap-4 shrink-0">
           <div className="min-w-0">
             {title && (
               <h1 className="font-pixelify font-bold text-[16px] truncate text-ink/85">{title}</h1>
@@ -81,7 +85,7 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
           </div>
         </div>
 
-        <div className="flex border-[3px] border-ink mb-6 overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
+        <div className="flex border-[3px] border-ink mb-6 overflow-hidden shrink-0" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
           {TABS.map(({ mode: tabMode, label }) => (
             <button
               key={tabMode}
@@ -97,10 +101,12 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
           ))}
         </div>
 
-        {mode === 'chat'       && <ChatInterface  topicId={params.topicId} model={model} />}
-        {mode === 'flashcards' && <FlashcardDeck  topicId={params.topicId} model={model} />}
-        {mode === 'quiz'       && <QuizMode       topicId={params.topicId} model={model} />}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {mode === 'chat'       && <ChatInterface  topicId={params.topicId} model={model} />}
+          {mode === 'flashcards' && <FlashcardDeck  topicId={params.topicId} model={model} />}
+          {mode === 'quiz'       && <QuizMode       topicId={params.topicId} model={model} />}
+        </div>
       </main>
-    </>
+    </div>
   );
 }

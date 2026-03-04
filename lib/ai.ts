@@ -33,6 +33,7 @@ the most important concepts a student should know for an exam.
 
 Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
 You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within the "front" and "back" string values to improve clarity.
+For mathematical expressions, use LaTeX math notation: $...$ for inline math and $$...$$ for display equations.
 Format: [{"front": "question or term", "back": "answer or definition"}, ...]
 Each answer should flow naturally from the question. For yes/no questions, lead with the answer then explain.
 
@@ -44,6 +45,7 @@ for exam practice. Cover a range of difficulty levels.
 
 Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
 You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within string values to improve clarity.
+For mathematical expressions, use LaTeX math notation: $...$ for inline math and $$...$$ for display equations.
 Format:
 [{
   "question": "...",

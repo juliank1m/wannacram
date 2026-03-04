@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Flashcard, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
+import GeneratingLoader from './GeneratingLoader';
 
 export default function FlashcardDeck({ topicId, model }: { topicId: string; model: AIModel }) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -30,6 +31,8 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
   const generate = async () => {
     setLoading(true);
     setError(null);
+    setCurrentIndex(0);
+    setFlipped(false);
     try {
       const res = await fetch('/api/flashcards', {
         method: 'POST',
@@ -40,8 +43,6 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
       const data = await res.json();
       setFlashcards(data.flashcards);
       setGenerated(true);
-      setCurrentIndex(0);
-      setFlipped(false);
       fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,29 +59,28 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
 
   if (sessionLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
         <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
     );
   }
 
+  if (loading) {
+    return <GeneratingLoader mode="flashcards" />;
+  }
+
   if (!generated) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)]">
+      <div className="flex flex-col items-center justify-center h-full">
         <div className="pixel-box p-0 overflow-hidden max-w-sm w-full">
           <div className="pixel-titlebar text-center">FLASHCARDS</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
               Generate flashcards from your topic to start studying
             </p>
-            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="pixel-spinner" style={{ width: 12, height: 12, borderWidth: 3 }} />
-                  GENERATING...
-                </span>
-              ) : '▶ GENERATE CARDS'}
+            <button onClick={generate} className="pixel-btn pixel-btn-primary">
+              ▶ GENERATE CARDS
             </button>
             {error && <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
@@ -97,7 +97,7 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
   const progress = Math.round(((currentIndex + 1) / flashcards.length) * 100);
 
   return (
-    <div className="flex flex-col items-center h-[calc(100vh-18rem)]">
+    <div className="flex flex-col items-center h-full">
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-4">
         <div className="flex justify-between font-pixelify font-semibold text-[14px] text-ink/70 mb-2">
@@ -133,7 +133,7 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
         <div className="p-6 flex items-center justify-center min-h-[140px] bg-surface">
           <MarkdownRenderer
             content={flipped ? card.back : card.front}
-            className="font-vt323 text-xl text-center w-full"
+            className="font-inter text-[15px] text-center w-full"
           />
         </div>
         <div className="absolute bottom-2 right-3 font-pixelify text-[13px] text-ink/50">

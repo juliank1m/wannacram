@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, VT323, Pixelify_Sans } from "next/font/google";
+import { Press_Start_2P, VT323, Pixelify_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 
@@ -24,6 +24,12 @@ const pixelifySans = Pixelify_Sans({
   display: "swap",
 });
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "WannaCram",
   description: "AI-powered study assistant for exam preparation",
@@ -35,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${pressStart.variable} ${vt323.variable} ${pixelifySans.variable}`}>
+    <html lang="en" className={`${pressStart.variable} ${vt323.variable} ${pixelifySans.variable} ${inter.variable}`}>
       <body className="antialiased min-h-screen bg-background text-foreground">
         {children}
       </body>

@@ -55,6 +55,12 @@ const components: Components = {
   },
 };
 
+function normalizeLatex(content: string): string {
+  return content
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner}$$`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => `$${inner}$`);
+}
+
 export default function MarkdownRenderer({
   content,
   className,
@@ -69,7 +75,7 @@ export default function MarkdownRenderer({
         rehypePlugins={[rehypeKatex]}
         components={components}
       >
-        {content}
+        {normalizeLatex(content)}
       </ReactMarkdown>
     </div>
   );
