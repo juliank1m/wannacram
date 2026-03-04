@@ -4,25 +4,22 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 export async function GET(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { searchParams } = new URL(request.url);
-    const documentId = searchParams.get('documentId');
+    const topicId = searchParams.get('topicId');
     const mode = searchParams.get('mode');
 
-    if (!documentId || !mode) {
-      return NextResponse.json({ error: 'Missing documentId or mode' }, { status: 400 });
+    if (!topicId || !mode) {
+      return NextResponse.json({ error: 'Missing topicId or mode' }, { status: 400 });
     }
 
     const { data: session } = await supabase
       .from('study_sessions')
       .select('id, messages')
       .eq('user_id', user.id)
-      .eq('document_id', documentId)
+      .eq('topic_id', topicId)
       .eq('mode', mode)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -35,26 +32,23 @@ export async function GET(request: Request) {
   }
 }
 
-// PATCH: reset quiz progress for a document (keep questions, reset position/score)
+// PATCH: reset quiz progress for a topic (keep questions, reset position/score)
 export async function PATCH(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { documentId } = (await request.json()) as { documentId: string };
-    if (!documentId) {
-      return NextResponse.json({ error: 'Missing documentId' }, { status: 400 });
+    const { topicId } = (await request.json()) as { topicId: string };
+    if (!topicId) {
+      return NextResponse.json({ error: 'Missing topicId' }, { status: 400 });
     }
 
     const { data: existing } = await supabase
       .from('study_sessions')
       .select('id, messages')
       .eq('user_id', user.id)
-      .eq('document_id', documentId)
+      .eq('topic_id', topicId)
       .eq('mode', 'quiz')
       .maybeSingle();
 
@@ -86,28 +80,24 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { documentId, mode, data } = (await request.json()) as {
-      documentId: string;
+    const { topicId, mode, data } = (await request.json()) as {
+      topicId: string;
       mode: string;
       data: unknown;
     };
 
-    if (!documentId || !mode || data === undefined) {
+    if (!topicId || !mode || data === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check for an existing session for this (user, document, mode)
     const { data: existing } = await supabase
       .from('study_sessions')
       .select('id')
       .eq('user_id', user.id)
-      .eq('document_id', documentId)
+      .eq('topic_id', topicId)
       .eq('mode', mode)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -123,7 +113,7 @@ export async function POST(request: Request) {
 
     const { data: inserted } = await supabase
       .from('study_sessions')
-      .insert({ user_id: user.id, document_id: documentId, mode, messages: data })
+      .insert({ user_id: user.id, topic_id: topicId, mode, messages: data })
       .select('id')
       .single();
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { QuizQuestion, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
+import GeneratingLoader from './GeneratingLoader';
 
 interface QuizState {
   questions: QuizQuestion[];
@@ -14,15 +15,15 @@ interface QuizState {
   showExplanation: boolean;
 }
 
-function saveQuizState(documentId: string, state: QuizState) {
+function saveQuizState(topicId: string, state: QuizState) {
   fetch('/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ documentId, mode: 'quiz', data: state }),
+    body: JSON.stringify({ topicId, mode: 'quiz', data: state }),
   }).catch(() => {});
 }
 
-export default function QuizMode({ documentId, model }: { documentId: string; model: AIModel }) {
+export default function QuizMode({ topicId, model }: { topicId: string; model: AIModel }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
   const [sessionLoading, setSessionLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/sessions?documentId=${documentId}&mode=quiz`)
+    fetch(`/api/sessions?topicId=${topicId}&mode=quiz`)
       .then((r) => r.json())
       .then((d) => {
         const saved: QuizState | undefined = d.session?.messages;
@@ -53,7 +54,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
-  }, [documentId]);
+  }, [topicId]);
 
   const generate = async () => {
     setLoading(true);
@@ -62,7 +63,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       const res = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, model }),
+        body: JSON.stringify({ topicId, model }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed');
       const data = await res.json();
@@ -74,7 +75,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setScore(0);
       setAnswered(0);
       setQuizComplete(false);
-      saveQuizState(documentId, { questions: data.questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
+      saveQuizState(topicId, { questions: data.questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -92,7 +93,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     setShowExplanation(true);
     setScore(newScore);
     setAnswered(newAnswered);
-    saveQuizState(documentId, { questions, currentIndex, score: newScore, answered: newAnswered, quizComplete: false, selectedAnswer: letter, showExplanation: true });
+    saveQuizState(topicId, { questions, currentIndex, score: newScore, answered: newAnswered, quizComplete: false, selectedAnswer: letter, showExplanation: true });
   };
 
   const nextQuestion = () => {
@@ -101,10 +102,10 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       setCurrentIndex(newIndex);
       setSelectedAnswer(null);
       setShowExplanation(false);
-      saveQuizState(documentId, { questions, currentIndex: newIndex, score, answered, quizComplete: false, selectedAnswer: null, showExplanation: false });
+      saveQuizState(topicId, { questions, currentIndex: newIndex, score, answered, quizComplete: false, selectedAnswer: null, showExplanation: false });
     } else {
       setQuizComplete(true);
-      saveQuizState(documentId, { questions, currentIndex, score, answered, quizComplete: true, selectedAnswer, showExplanation });
+      saveQuizState(topicId, { questions, currentIndex, score, answered, quizComplete: true, selectedAnswer, showExplanation });
     }
   };
 
@@ -115,34 +116,33 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     setScore(0);
     setAnswered(0);
     setQuizComplete(false);
-    saveQuizState(documentId, { questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
+    saveQuizState(topicId, { questions, currentIndex: 0, score: 0, answered: 0, quizComplete: false, selectedAnswer: null, showExplanation: false });
   };
 
   if (sessionLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
         <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
     );
   }
 
+  if (loading) {
+    return <GeneratingLoader mode="quiz" />;
+  }
+
   if (!generated) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)]">
+      <div className="flex flex-col items-center justify-center h-full">
         <div className="pixel-box p-0 overflow-hidden max-w-sm w-full">
           <div className="pixel-titlebar text-center">QUIZ MODE</div>
           <div className="p-8 text-center">
             <p className="font-vt323 text-xl text-ink/55 mb-6 leading-relaxed">
-              Generate a quiz from your document to test your knowledge
+              Generate a quiz from your topic to test your knowledge
             </p>
-            <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="pixel-spinner" style={{ width: 12, height: 12, borderWidth: 3 }} />
-                  GENERATING...
-                </span>
-              ) : '▶ START QUIZ'}
+            <button onClick={generate} className="pixel-btn pixel-btn-primary">
+              ▶ START QUIZ
             </button>
             {error && <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mt-4 leading-relaxed">{error}</p>}
           </div>
@@ -156,7 +156,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
     const grade = pct >= 90 ? 'S' : pct >= 70 ? 'A' : pct >= 50 ? 'B' : 'C';
     const gradeColor = pct >= 70 ? 'var(--px-green)' : pct >= 50 ? 'var(--px-yellow)' : 'var(--px-red)';
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)]">
+      <div className="flex flex-col items-center justify-center h-full">
         <div className="pixel-box p-0 overflow-hidden max-w-sm w-full" style={{ boxShadow: '6px 6px 0 var(--ink)' }}>
           <div className="pixel-titlebar text-[10px] text-center">QUIZ COMPLETE!</div>
           <div className="p-8 text-center">
@@ -183,7 +183,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
   const progress = Math.round(((currentIndex + 1) / questions.length) * 100);
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto h-full overflow-y-auto pr-1">
       {/* Progress */}
       <div className="mb-5">
         <div className="flex justify-between font-pixelify font-semibold text-[14px] text-ink/70 mb-2">
@@ -199,7 +199,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
       <div className="pixel-box p-0 overflow-hidden mb-4">
         <div className="pixel-titlebar">QUESTION {currentIndex + 1}</div>
         <div className="p-4">
-          <MarkdownRenderer content={q.question} className="font-vt323 text-xl leading-snug" />
+          <MarkdownRenderer content={q.question} className="font-inter text-[15px] leading-snug" />
         </div>
       </div>
 
@@ -222,10 +222,10 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
               key={option}
               onClick={() => handleAnswer(option)}
               disabled={!!selectedAnswer}
-              className={`w-full text-left border-[3px] px-4 py-3 font-vt323 text-xl transition-all duration-75 ${bg} border-${border}`}
+              className={`w-full text-left border-[3px] px-4 py-3 font-inter text-[15px] transition-all duration-75 ${bg} border-${border}`}
               style={{ borderColor: `var(--${border === 'border-ink' ? 'ink' : border.replace('border-', '')})`, boxShadow: shadow }}
             >
-              {option}
+              <MarkdownRenderer content={option} />
             </button>
           );
         })}
@@ -240,7 +240,7 @@ export default function QuizMode({ documentId, model }: { documentId: string; mo
             {selectedAnswer === q.answer ? '✓ CORRECT!' : `✗ WRONG — ANSWER: ${q.answer}`}
           </div>
           <div className="p-4">
-            <MarkdownRenderer content={q.explanation} className="font-vt323 text-[19px] text-ink/70" />
+            <MarkdownRenderer content={q.explanation} className="font-inter text-[14px] text-ink/70" />
           </div>
         </div>
       )}

@@ -21,8 +21,9 @@ parts of the material. If asked, generate practice questions or summaries.
 
 Use markdown formatting to improve clarity: headers (##, ###) to organize long responses,
 **bold** for key terms, *italics* for emphasis, bullet or numbered lists for enumerations,
-and fenced code blocks for any code, formulas, or technical syntax — always include the language
-identifier (e.g. \`\`\`python, \`\`\`java, \`\`\`sql). Keep responses focused.
+and fenced code blocks for any code or technical syntax — always include the language
+identifier (e.g. \`\`\`python, \`\`\`java, \`\`\`sql). For mathematical expressions, use
+LaTeX math notation: $...$ for inline math and $$...$$ for display equations. Keep responses focused.
 
 COURSE MATERIAL:
 ${extractedText}`;
@@ -32,6 +33,7 @@ the most important concepts a student should know for an exam.
 
 Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
 You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within the "front" and "back" string values to improve clarity.
+For mathematical expressions, use LaTeX math notation: $...$ for inline math and $$...$$ for display equations.
 Format: [{"front": "question or term", "back": "answer or definition"}, ...]
 Each answer should flow naturally from the question. For yes/no questions, lead with the answer then explain.
 
@@ -43,6 +45,7 @@ for exam practice. Cover a range of difficulty levels.
 
 Respond ONLY with a valid JSON array — no surrounding text, no markdown code fences.
 You may use basic markdown (bold, lists, fenced code blocks with language tags like \`\`\`python) within string values to improve clarity.
+For mathematical expressions, use LaTeX math notation: $...$ for inline math and $$...$$ for display equations.
 Format:
 [{
   "question": "...",

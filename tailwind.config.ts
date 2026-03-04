@@ -23,6 +23,7 @@ const config: Config = {
         pixel: ["var(--font-pixel)", "monospace"],
         vt323: ["var(--font-vt323)", "monospace"],
         pixelify: ["var(--font-pixelify)", "monospace"],
+        inter: ["var(--font-inter)", "sans-serif"],
       },
       boxShadow: {
         pixel: "4px 4px 0px var(--ink)",

@@ -4,16 +4,16 @@ import { useState, useRef, useEffect } from 'react';
 import type { Message, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 
-export default function ChatInterface({ documentId, model }: { documentId: string; model: AIModel }) {
+export default function ChatInterface({ topicId, model }: { topicId: string; model: AIModel }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Load session
   useEffect(() => {
-    fetch(`/api/sessions?documentId=${documentId}&mode=chat`)
+    fetch(`/api/sessions?topicId=${topicId}&mode=chat`)
       .then((r) => r.json())
       .then((d) => {
         if (Array.isArray(d.session?.messages) && d.session.messages.length > 0)
@@ -21,23 +21,24 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
-  }, [documentId]);
+  }, [topicId]);
 
   // Restore draft
   useEffect(() => {
-    try { const d = sessionStorage.getItem(`chat-draft-${documentId}`); if (d) setInput(d); } catch {}
-  }, [documentId]);
+    try { const d = sessionStorage.getItem(`chat-draft-${topicId}`); if (d) setInput(d); } catch {}
+  }, [topicId]);
 
   // Persist draft
   useEffect(() => {
     try {
-      if (input) sessionStorage.setItem(`chat-draft-${documentId}`, input);
-      else sessionStorage.removeItem(`chat-draft-${documentId}`);
+      if (input) sessionStorage.setItem(`chat-draft-${topicId}`, input);
+      else sessionStorage.removeItem(`chat-draft-${topicId}`);
     } catch {}
-  }, [input, documentId]);
+  }, [input, topicId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +56,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, messages: newMessages, model }),
+        body: JSON.stringify({ topicId, messages: newMessages, model }),
       });
 
       if (!res.ok) {
@@ -90,7 +91,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
       fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, mode: 'chat', data: finalMessages }),
+        body: JSON.stringify({ topicId, mode: 'chat', data: finalMessages }),
       }).catch(() => {});
     } catch (err) {
       setMessages([...newMessages, {
@@ -104,7 +105,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
 
   if (sessionLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-18rem)] gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
         <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
       </div>
@@ -112,15 +113,15 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-18rem)]">
+    <div className="flex flex-col h-full">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 pb-4 pr-1">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto space-y-4 pb-4 pr-1">
         {messages.length === 0 && (
           <div className="pixel-box p-0 max-w-md mx-auto mt-12 overflow-hidden">
             <div className="pixel-titlebar text-center">READY TO STUDY</div>
             <div className="p-6 text-center">
               <p className="font-vt323 text-xl text-ink/55 leading-relaxed">
-                Ask anything about your document.<br />
+                Ask anything about your topic.<br />
                 Try &ldquo;Summarize the key concepts&rdquo; or<br />
                 &ldquo;What are the main topics?&rdquo;
               </p>
@@ -134,7 +135,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
               <div className="font-pixelify font-bold text-[14px] text-[var(--px-blue)] mr-2 mt-2 shrink-0 self-start">AI</div>
             )}
             <div
-              className={`max-w-[80%] border-[3px] border-ink px-4 py-2 font-vt323 text-[19px] leading-snug ${
+              className={`max-w-[80%] border-[3px] border-ink px-4 py-2 font-inter text-[15px] leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-[var(--px-blue)] text-white'
                   : 'bg-surface text-ink'
@@ -155,7 +156,6 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
             )}
           </div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -165,7 +165,7 @@ export default function ChatInterface({ documentId, model }: { documentId: strin
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your document..."
+            placeholder="Ask about your topic..."
             disabled={streaming}
             className="pixel-input flex-1"
           />
