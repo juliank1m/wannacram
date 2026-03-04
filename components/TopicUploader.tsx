@@ -78,8 +78,9 @@ export default function TopicUploader() {
         body: formData,
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Upload failed');
+        let msg = 'Upload failed';
+        try { const data = await res.json(); msg = data.error || msg; } catch {}
+        throw new Error(msg);
       }
       const data = await res.json();
       setUploadedDocs((prev) => [...prev, data.document]);
@@ -97,17 +98,17 @@ export default function TopicUploader() {
     setUploadedDocs((prev) => prev.filter((d) => d.id !== docId));
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
     const files = Array.from(e.dataTransfer.files);
-    files.forEach((f) => handleFile(f));
+    for (const f of files) { await handleFile(f); }
   }, [handleFile]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    files.forEach((f) => handleFile(f));
     e.target.value = '';
+    for (const f of files) { await handleFile(f); }
   }, [handleFile]);
 
   const FILE_TYPE_COLORS: Record<string, string> = {
