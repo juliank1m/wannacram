@@ -84,7 +84,7 @@ export function streamChat(
         try {
           const stream = await openai.chat.completions.create({
             model: openaiModel,
-            max_tokens: 4096,
+            max_completion_tokens: 4096,
             stream: true,
             messages: [
               { role: 'system', content: systemPrompt },
@@ -166,7 +166,7 @@ export async function generateCompletion(
   if (openaiModel) {
     const response = await openai.chat.completions.create({
       model: openaiModel,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     });
     return response.choices[0]?.message?.content ?? '';
