@@ -19,6 +19,7 @@ const TABS: { mode: Mode; label: string }[] = [
 const MODELS: { value: AIModel; label: string }[] = [
   { value: 'claude-sonnet', label: 'CLAUDE' },
   { value: 'gpt-4o-mini',   label: 'GPT-4O' },
+  { value: 'gpt-5-mini',    label: 'GPT-5' },
 ];
 
 export default function TopicStudyPage({ params }: { params: { topicId: string } }) {

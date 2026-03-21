@@ -12,6 +12,17 @@ const openai = new OpenAI({
 
 export { anthropic, openai };
 
+const OPENAI_MODEL_IDS = {
+  'gpt-4o-mini': 'gpt-4o-mini',
+  'gpt-5-mini': 'gpt-5-mini',
+} satisfies Partial<Record<AIModel, string>>;
+
+function getOpenAIModelId(model: AIModel) {
+  return model in OPENAI_MODEL_IDS
+    ? OPENAI_MODEL_IDS[model as keyof typeof OPENAI_MODEL_IDS]
+    : null;
+}
+
 // -- Prompt templates (shared across providers) --
 
 export const CHAT_SYSTEM_PROMPT = (extractedText: string) => `You are a study assistant helping a student prepare for an exam.
@@ -65,13 +76,14 @@ export function streamChat(
   messages: Message[]
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
+  const openaiModel = getOpenAIModelId(model);
 
-  if (model === 'gpt-4o-mini') {
+  if (openaiModel) {
     return new ReadableStream({
       async start(controller) {
         try {
           const stream = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: openaiModel,
             max_tokens: 4096,
             stream: true,
             messages: [
@@ -149,9 +161,11 @@ export async function generateCompletion(
   model: AIModel,
   prompt: string
 ): Promise<string> {
-  if (model === 'gpt-4o-mini') {
+  const openaiModel = getOpenAIModelId(model);
+
+  if (openaiModel) {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: openaiModel,
       max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -171,4 +185,5 @@ export async function generateCompletion(
 export const MODEL_LABELS: Record<AIModel, string> = {
   'claude-sonnet': 'Claude Sonnet',
   'gpt-4o-mini': 'GPT-4o Mini',
+  'gpt-5-mini': 'GPT-5 Mini',
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 
@@ -17,6 +17,15 @@ interface UploadedDoc {
   file_type: string;
 }
 
+function mapTopicDocuments(topicDocuments: unknown[]): UploadedDoc[] {
+  return topicDocuments
+    .map((topicDocument) => {
+      const document = (topicDocument as { document?: UploadedDoc | null }).document;
+      return document ?? null;
+    })
+    .filter((document): document is UploadedDoc => Boolean(document));
+}
+
 export default function TopicUploader() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,6 +36,8 @@ export default function TopicUploader() {
   const [topicId, setTopicId] = useState<string | null>(existingTopicId);
   const [creatingTopic, setCreatingTopic] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
+  const [loadingExistingTopic, setLoadingExistingTopic] = useState(Boolean(existingTopicId));
+  const [loadingExistingTopicError, setLoadingExistingTopicError] = useState<string | null>(null);
 
   // Step 2: uploading files
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
@@ -34,6 +45,49 @@ export default function TopicUploader() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!existingTopicId) {
+      setTopicId(null);
+      setTopicTitle('');
+      setUploadedDocs([]);
+      setLoadingExistingTopic(false);
+      setLoadingExistingTopicError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingExistingTopic(true);
+    setLoadingExistingTopicError(null);
+
+    fetch(`/api/topics/${existingTopicId}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          throw new Error(data?.error || 'Failed to load topic');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setTopicId(data.topic.id);
+        setTopicTitle(data.topic.title ?? '');
+        setUploadedDocs(mapTopicDocuments(data.topic.topic_documents ?? []));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setLoadingExistingTopicError(
+          err instanceof Error ? err.message.toUpperCase() : 'FAILED TO LOAD TOPIC'
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingExistingTopic(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [existingTopicId]);
 
   const handleCreateTopic = async () => {
     if (!topicTitle.trim()) return;
@@ -104,7 +158,9 @@ export default function TopicUploader() {
         throw new Error(msg);
       }
       const data = await res.json();
-      setUploadedDocs((prev) => [...prev, data.document]);
+      setUploadedDocs((prev) => (
+        prev.some((doc) => doc.id === data.document.id) ? prev : [...prev, data.document]
+      ));
     } catch (err) {
       // Clean up orphaned storage file if API call failed after upload succeeded
       if (filePath) {
@@ -142,6 +198,42 @@ export default function TopicUploader() {
     docx: 'var(--px-blue)',
     pptx: 'var(--px-yellow)',
   };
+
+  if (loadingExistingTopic) {
+    return (
+      <div className="w-full max-w-lg mx-auto">
+        <div className="pixel-box p-0 overflow-hidden" style={{ boxShadow: '4px 4px 0px var(--ink)' }}>
+          <div className="pixel-titlebar text-center">[ LOADING TOPIC ]</div>
+          <div className="p-10 flex flex-col items-center gap-4 text-center">
+            <div className="pixel-spinner" style={{ width: 28, height: 28, borderWidth: 4 }} />
+            <p className="font-pixelify font-semibold text-[14px] text-ink/60">
+              FETCHING CURRENT FILES...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadingExistingTopicError) {
+    return (
+      <div className="w-full max-w-lg mx-auto">
+        <div className="pixel-box p-0 overflow-hidden" style={{ boxShadow: '4px 4px 0px var(--px-red)' }}>
+          <div className="pixel-titlebar text-center" style={{ background: 'var(--px-red)' }}>
+            [ TOPIC ERROR ]
+          </div>
+          <div className="p-8 text-center space-y-5">
+            <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)]">
+              {loadingExistingTopicError}
+            </p>
+            <button onClick={() => router.push('/dashboard')} className="pixel-btn">
+              BACK TO TOPICS
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ── Step 1: Name the topic ──
   if (!topicId) {
@@ -181,10 +273,27 @@ export default function TopicUploader() {
   // ── Step 2: Add files ──
   return (
     <div className="w-full max-w-lg mx-auto space-y-4">
-      {/* Uploaded files list */}
-      {uploadedDocs.length > 0 && (
+      {topicTitle && (
         <div className="pixel-box p-0 overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
-          <div className="pixel-titlebar">FILES ADDED ({uploadedDocs.length})</div>
+          <div className="pixel-titlebar">TOPIC</div>
+          <div className="px-4 py-4 bg-surface">
+            <p className="font-pixelify font-semibold text-[15px] text-ink">{topicTitle}</p>
+            <p className="font-vt323 text-lg text-ink/60 mt-1">
+              Current files stay here. Add more anytime.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="pixel-box p-0 overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--ink)' }}>
+        <div className="pixel-titlebar">FILES ADDED ({uploadedDocs.length})</div>
+        {uploadedDocs.length === 0 ? (
+          <div className="px-4 py-6 text-center bg-surface">
+            <p className="font-pixelify font-semibold text-[13px] text-ink/50">
+              No files uploaded yet.
+            </p>
+          </div>
+        ) : (
           <ul className="divide-y-[3px] divide-ink">
             {uploadedDocs.map((doc) => (
               <li key={doc.id} className="flex items-center justify-between px-4 py-3 gap-3">
@@ -206,8 +315,8 @@ export default function TopicUploader() {
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Drop zone */}
       <div
@@ -239,8 +348,11 @@ export default function TopicUploader() {
             </div>
           ) : (
             <>
-              <p className="font-vt323 text-xl text-ink/75 mb-5">
+              <p className="font-vt323 text-xl text-ink/75 mb-2">
                 Drag and drop files here, or browse
+              </p>
+              <p className="font-vt323 text-lg text-ink/55 mb-5">
+                New uploads are added to the list above.
               </p>
               <label className="pixel-btn pixel-btn-primary cursor-pointer">
                 ▶ BROWSE FILES
