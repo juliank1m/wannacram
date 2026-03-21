@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { Flashcard, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 import GeneratingLoader from './GeneratingLoader';
+import { TOPIC_DOCUMENTS_CHANGED_EVENT } from '@/lib/topic-context';
 
 export default function FlashcardDeck({ topicId, model }: { topicId: string; model: AIModel }) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -26,6 +27,24 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
+  }, [topicId]);
+
+  useEffect(() => {
+    const handleTopicDocumentsChanged = (event: Event) => {
+      const detail = (event as CustomEvent<{ topicId?: string }>).detail;
+      if (detail?.topicId !== topicId) return;
+
+      setFlashcards([]);
+      setCurrentIndex(0);
+      setFlipped(false);
+      setGenerated(false);
+      setError(null);
+    };
+
+    window.addEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    return () => {
+      window.removeEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    };
   }, [topicId]);
 
   const generate = async () => {

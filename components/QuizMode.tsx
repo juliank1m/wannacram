@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { QuizQuestion, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 import GeneratingLoader from './GeneratingLoader';
+import { TOPIC_DOCUMENTS_CHANGED_EVENT } from '@/lib/topic-context';
 
 interface QuizState {
   questions: QuizQuestion[];
@@ -54,6 +55,28 @@ export default function QuizMode({ topicId, model }: { topicId: string; model: A
       })
       .catch(() => {})
       .finally(() => setSessionLoading(false));
+  }, [topicId]);
+
+  useEffect(() => {
+    const handleTopicDocumentsChanged = (event: Event) => {
+      const detail = (event as CustomEvent<{ topicId?: string }>).detail;
+      if (detail?.topicId !== topicId) return;
+
+      setQuestions([]);
+      setCurrentIndex(0);
+      setSelectedAnswer(null);
+      setShowExplanation(false);
+      setScore(0);
+      setAnswered(0);
+      setGenerated(false);
+      setQuizComplete(false);
+      setError(null);
+    };
+
+    window.addEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    return () => {
+      window.removeEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    };
   }, [topicId]);
 
   const generate = async () => {

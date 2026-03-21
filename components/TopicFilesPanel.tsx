@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase';
+import { notifyTopicDocumentsChanged, resetTopicStudySessions } from '@/lib/topic-context';
 
 const ACCEPTED_TYPES = [
   'application/pdf',
@@ -58,8 +59,18 @@ export default function TopicFilesPanel({
   }, [isOpen, fetchDocs]);
 
   const handleDelete = async (docId: string) => {
+    setError(null);
+    const res = await fetch(`/api/topics/${topicId}/documents/${docId}`, { method: 'DELETE' });
+    if (!res.ok) {
+      let msg = 'Failed to remove file';
+      try { const data = await res.json(); msg = data.error || msg; } catch {}
+      setError(msg.toUpperCase());
+      return;
+    }
+
     setDocs((prev) => prev.filter((d) => d.id !== docId));
-    await fetch(`/api/topics/${topicId}/documents/${docId}`, { method: 'DELETE' }).catch(() => {});
+    await resetTopicStudySessions(topicId).catch(() => {});
+    notifyTopicDocumentsChanged(topicId);
   };
 
   const handleFile = useCallback(async (file: File) => {
@@ -101,6 +112,8 @@ export default function TopicFilesPanel({
       }
       const data = await res.json();
       setDocs((prev) => [...prev, data.document]);
+      await resetTopicStudySessions(topicId).catch(() => {});
+      notifyTopicDocumentsChanged(topicId);
     } catch (err) {
       if (filePath) {
         createClient().storage.from('documents').remove([filePath]).catch(() => {});

@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Message, AIModel } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
+import { TOPIC_DOCUMENTS_CHANGED_EVENT } from '@/lib/topic-context';
 
 export default function ChatInterface({ topicId, model }: { topicId: string; model: AIModel }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [contextUpdated, setContextUpdated] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Load session
@@ -26,6 +28,24 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
   // Restore draft
   useEffect(() => {
     try { const d = sessionStorage.getItem(`chat-draft-${topicId}`); if (d) setInput(d); } catch {}
+  }, [topicId]);
+
+  useEffect(() => {
+    const handleTopicDocumentsChanged = (event: Event) => {
+      const detail = (event as CustomEvent<{ topicId?: string }>).detail;
+      if (detail?.topicId !== topicId) return;
+
+      setMessages([]);
+      setInput('');
+      setStreaming(false);
+      setContextUpdated(true);
+      try { sessionStorage.removeItem(`chat-draft-${topicId}`); } catch {}
+    };
+
+    window.addEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    return () => {
+      window.removeEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
+    };
   }, [topicId]);
 
   // Persist draft
@@ -47,6 +67,7 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
 
     const userMessage: Message = { role: 'user', content: input.trim() };
     const newMessages = [...messages, userMessage];
+    setContextUpdated(false);
     setMessages(newMessages);
     setInput('');
     setStreaming(true);
@@ -160,6 +181,11 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
 
       {/* Input */}
       <div className="pt-4 border-t-[3px] border-ink">
+        {contextUpdated && (
+          <p className="font-pixelify font-semibold text-[13px] text-[var(--px-green)] mb-3">
+            Files changed. Chat history was cleared so the next answer uses the latest uploads.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"

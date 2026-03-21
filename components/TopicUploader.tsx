@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import { notifyTopicDocumentsChanged, resetTopicStudySessions } from '@/lib/topic-context';
 
 const ACCEPTED_TYPES = [
   'application/pdf',
@@ -161,6 +162,8 @@ export default function TopicUploader() {
       setUploadedDocs((prev) => (
         prev.some((doc) => doc.id === data.document.id) ? prev : [...prev, data.document]
       ));
+      await resetTopicStudySessions(topicId).catch(() => {});
+      notifyTopicDocumentsChanged(topicId);
     } catch (err) {
       // Clean up orphaned storage file if API call failed after upload succeeded
       if (filePath) {
@@ -176,8 +179,17 @@ export default function TopicUploader() {
 
   const handleRemove = async (docId: string) => {
     if (!topicId) return;
-    await fetch(`/api/topics/${topicId}/documents/${docId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/topics/${topicId}/documents/${docId}`, { method: 'DELETE' });
+    if (!res.ok) {
+      let msg = 'Failed to remove file';
+      try { const data = await res.json(); msg = data.error || msg; } catch {}
+      setUploadError(msg.toUpperCase());
+      return;
+    }
+
     setUploadedDocs((prev) => prev.filter((d) => d.id !== docId));
+    await resetTopicStudySessions(topicId).catch(() => {});
+    notifyTopicDocumentsChanged(topicId);
   };
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {

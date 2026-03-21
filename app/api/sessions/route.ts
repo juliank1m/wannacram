@@ -123,3 +123,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { topicId } = (await request.json()) as { topicId: string };
+    if (!topicId) {
+      return NextResponse.json({ error: 'Missing topicId' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('study_sessions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('topic_id', topicId);
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to reset study sessions' }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('Sessions DELETE error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
