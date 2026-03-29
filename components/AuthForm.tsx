@@ -23,14 +23,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
     try {
       if (mode === 'signup') {
-        const base =
-          process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || window.location.origin;
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${base}/auth/callback` },
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
         });
-        if (error) throw error;
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        if (!res.ok) throw new Error(data.error ?? 'Signup failed');
         setError('CHECK YOUR EMAIL FOR A CONFIRMATION LINK.');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
