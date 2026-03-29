@@ -29,11 +29,12 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users to login (except for auth routes and landing)
+  // Redirect unauthenticated users to login (except for auth routes, API, and landing)
   const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
   const isLandingPage = request.nextUrl.pathname === '/';
 
-  if (!user && !isAuthRoute && !isLandingPage) {
+  if (!user && !isAuthRoute && !isApiRoute && !isLandingPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/login';
     return NextResponse.redirect(url);
