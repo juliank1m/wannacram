@@ -23,10 +23,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
     try {
       if (mode === 'signup') {
+        const base =
+          process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || window.location.origin;
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { emailRedirectTo: `${base}/auth/callback` },
         });
         if (error) throw error;
         setError('CHECK YOUR EMAIL FOR A CONFIRMATION LINK.');
