@@ -15,7 +15,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,10 +27,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         });
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        const data = (await res.json().catch(() => ({} as { error?: string }))) as {
+          error?: string;
+        };
         if (!res.ok) throw new Error(data.error ?? 'Signup failed');
         setError('CHECK YOUR EMAIL FOR A CONFIRMATION LINK.');
       } else {
+        const supabase = createClient();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         router.push('/dashboard');

@@ -5,6 +5,12 @@ function redirectOrigin(request: Request): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
   if (fromEnv) return fromEnv;
 
+  // On Vercel, prefer the deployment URL so we don't accidentally fall back
+  // to whatever host the browser used (or proxy headers that look odd).
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
   const host =
     request.headers.get('x-forwarded-host')?.split(',')[0]?.trim() ??
     request.headers.get('host') ??
@@ -14,10 +20,6 @@ function redirectOrigin(request: Request): string {
       request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() ??
       (host.includes('localhost') || host.startsWith('127.') ? 'http' : 'https');
     return `${proto}://${host}`;
-  }
-
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
   }
 
   return 'http://localhost:3000';
@@ -50,7 +52,8 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const status = typeof error.status === 'number' ? error.status : 400;
+    return NextResponse.json({ error: error.message }, { status });
   }
 
   return NextResponse.json({ ok: true });
