@@ -7,9 +7,10 @@ import Link from 'next/link';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
+  verified?: boolean;
 }
 
-export default function AuthForm({ mode }: AuthFormProps) {
+export default function AuthForm({ mode, verified }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {verified && mode === 'login' && (
+                <div className="border-[3px] border-[var(--px-green)] bg-[var(--px-green)]/10 px-3 py-2">
+                  <p className="font-pixel text-[10px] text-[var(--px-green)] leading-relaxed">
+                    EMAIL CONFIRMED. YOU CAN SIGN IN.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="email" className="pixel-label">EMAIL ADDRESS</label>
                 <input

@@ -45,10 +45,11 @@ export async function POST(request: Request) {
   );
 
   const origin = redirectOrigin(request);
+  const next = encodeURIComponent('/auth/login?verified=1');
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
+    options: { emailRedirectTo: `${origin}/auth/callback?next=${next}` },
   });
 
   if (error) {
