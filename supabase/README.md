@@ -18,18 +18,29 @@ before this directory existed. `supabase db push` on its own therefore tries to
 run `20260303_topics.sql`, which does `create table topics`, and fails because
 the table is already there.
 
+The CLI is a devDependency, so use `npx supabase` (Homebrew's formula is gated
+behind an Xcode version check on this machine).
+
+Two secrets are needed and neither is stored in the repo: an access token
+(`npx supabase login`, or `SUPABASE_ACCESS_TOKEN`) and the project's Postgres
+password, from Dashboard → Project Settings → Database.
+
 Mark the migrations that are already reflected in the database as applied first:
 
 ```bash
-supabase link --project-ref kgkmtbtoygbxndqhbrov
+npx supabase login
+npx supabase link --project-ref kgkmtbtoygbxndqhbrov   # prompts for the DB password
 
-supabase migration repair --status applied 00000000000000
-supabase migration repair --status applied 20260303
-supabase migration repair --status applied 20260304
+npx supabase migration repair --status applied 00000000000000
+npx supabase migration repair --status applied 20260303
+npx supabase migration repair --status applied 20260304
 
-supabase migration list          # confirm only the 20260807 files are pending
-supabase db push
+npx supabase migration list      # confirm only the 20260807 files are pending
+npx supabase db push
 ```
+
+Afterwards, `npx supabase db advisors --linked` reports any security or
+performance lints the change introduced.
 
 `00000000000000_init.sql` reconstructs the pre-existing `documents` and
 `study_sessions` tables so a fresh `supabase db reset` works. It is idempotent,
