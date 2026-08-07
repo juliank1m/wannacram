@@ -11,55 +11,54 @@ Applies every migration to a throwaway Postgres cluster with stubbed `auth` and
 the result. Needs a local Postgres (`initdb`/`pg_ctl`/`psql`); no Docker, no CLI,
 and it never contacts the real project.
 
-## Applying to the hosted project
+## Hosted project state
 
-The project's migration history is **empty** — the schema was built by hand
-before this directory existed. `supabase db push` on its own therefore tries to
-run `20260303_topics.sql`, which does `create table topics`, and fails because
-the table is already there.
-
-The CLI is a devDependency, so use `npx supabase` (Homebrew's formula is gated
-behind an Xcode version check on this machine).
-
-Two secrets are needed and neither is stored in the repo: an access token
-(`npx supabase login`, or `SUPABASE_ACCESS_TOKEN`) and the project's Postgres
-password, from Dashboard → Project Settings → Database.
-
-Mark the migrations that are already reflected in the database as applied first:
-
-```bash
-npx supabase login
-npx supabase link --project-ref kgkmtbtoygbxndqhbrov   # prompts for the DB password
-
-npx supabase migration repair --status applied 00000000000000
-npx supabase migration repair --status applied 20260303
-npx supabase migration repair --status applied 20260304
-
-npx supabase migration list      # confirm only the 20260807 files are pending
-npx supabase db push
-```
-
-Afterwards, `npx supabase db advisors --linked` reports any security or
-performance lints the change introduced.
+All five migrations are recorded as applied on `kgkmtbtoygbxndqhbrov`, so
+`db push` has nothing pending. The two `20260807*` files were applied on
+2026-08-07; the three earlier versions were backfilled into
+`supabase_migrations.schema_migrations`, because the schema had been built by
+hand before this directory existed and the history table did not exist at all.
 
 `00000000000000_init.sql` reconstructs the pre-existing `documents` and
-`study_sessions` tables so a fresh `supabase db reset` works. It is idempotent,
-so applying it instead of repairing it is harmless — repairing is just more
-honest about what already happened.
+`study_sessions` tables so a fresh `supabase db reset` works. It never ran
+against the hosted project — it is a record of what was already there.
 
-## What the pending migrations change
+The CLI is a devDependency, so use `npx supabase` (Homebrew's formula is gated
+behind an Xcode version check on this machine). It needs an access token
+(`npx supabase login`, or `SUPABASE_ACCESS_TOKEN`) and, for anything touching
+the database, the Postgres password from Dashboard → Project Settings →
+Database. Note that `supabase link` currently fails on this project with a
+`LegacyLinkApiKeysNetworkError` — a CLI-side schema check rejects the
+`inserted_at` timestamp on one of the API keys.
 
-`20260807_data_api_grants.sql`
+## What the applied migrations changed
+
+`20260807140821_data_api_grants.sql`
 - Revokes the blanket `anon`/`authenticated` CRUD grants (which include
   `TRUNCATE`, not governed by RLS) and re-grants only what the app uses.
 - Replaces the four command-specific `documents_*_own` policies with one, scopes
   every policy to `authenticated`, and wraps `auth.uid()` in a subquery.
 
-`20260807_integrity.sql`
+`20260807140832_integrity.sql`
 - Makes the foreign keys to `auth.users` cascade, so account deletion stops
   failing partway through.
-- **Deletes data:** the dedupe keeps the newest row of each duplicate
-  `(user_id, topic_id, mode)` group before adding the unique index. As of
-  2026-08-07 the live project has one such group, so this removes exactly one
-  stale `study_sessions` row.
+- **Deleted data:** the dedupe keeps the newest row of each duplicate
+  `(user_id, topic_id, mode)` group before adding the unique index. The live
+  project had one such group, so this removed one stale `study_sessions` row
+  (9 → 8) before the unique index went on.
 - Adds the missing indexes; before this the only indexes were primary keys.
+
+## Verified state after applying
+
+```
+grants        anon: none on any table
+              authenticated: SELECT on topics/topic_documents/documents,
+                             SELECT+INSERT+UPDATE+DELETE on study_sessions
+              service_role: full CRUD
+policies      4 total, all scoped {authenticated}, all using (select auth.uid())
+foreign keys  all 6 ON DELETE CASCADE
+indexes       7 non-primary-key indexes, none before
+data          topics=5 documents=33 sessions=8 users=5 duplicate_groups=0
+advisors      security: leaked password protection disabled (pre-existing)
+              performance: 6x unused_index (INFO — the indexes are new)
+```

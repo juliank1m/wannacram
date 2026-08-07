@@ -77,8 +77,8 @@ grant all on table public.topics, public.topic_documents,
 SQL
 
 echo "### new migrations"
-apply 20260807_data_api_grants
-apply 20260807_integrity
+apply 20260807140821_data_api_grants
+apply 20260807140832_integrity
 
 echo
 echo "### assertions"
@@ -211,7 +211,7 @@ VISIBLE=$(command psql -h "$SOCK" -U postgres -d $DB -qtAc \
   && echo "NOTICE:  RLS isolation OK (authenticated sees only 'mine')" \
   || { echo "FAIL: authenticated saw '$VISIBLE', expected 'mine'"; exit 1; }
 
-# The dedupe in 20260807_integrity deletes production rows, so prove it keeps
+# The dedupe in 20260807140832_integrity deletes production rows, so prove it keeps
 # the newest of each duplicate group. Rebuild the pre-migration state and re-run
 # just that statement.
 echo
@@ -242,7 +242,7 @@ KEPT=$(command psql -h "$SOCK" -U postgres -d $DB -qtAc "
 # the new ones will be applied for the first time to a populated database.
 echo
 echo "### idempotency: re-apply the new migrations"
-for f in 00000000000000_init 20260807_data_api_grants 20260807_integrity; do
+for f in 00000000000000_init 20260807140821_data_api_grants 20260807140832_integrity; do
   psql -d $DB -f "$REPO/supabase/migrations/$f.sql" >/dev/null \
     || { echo "FAIL: $f.sql is not idempotent"; exit 1; }
   echo "    -> $f.sql re-applied cleanly"

@@ -7,7 +7,7 @@
 -- On the existing project this file is a reconstruction of what is already
 -- there — mark it applied with `supabase migration repair` rather than running
 -- it (see supabase/README.md). It is idempotent either way. Policy tuning and
--- Data API grants live in 20260807_data_api_grants.sql so they apply to the
+-- Data API grants live in 20260807140821_data_api_grants.sql so they apply to the
 -- existing project too.
 
 create table if not exists documents (
@@ -33,7 +33,7 @@ alter table documents enable row level security;
 alter table study_sessions enable row level security;
 
 -- Baseline policies so a freshly reset database is never left open between
--- this migration and 20260807_data_api_grants.sql, which replaces them.
+-- this migration and 20260807140821_data_api_grants.sql, which replaces them.
 drop policy if exists documents_all_own on documents;
 create policy documents_all_own
   on documents for all
