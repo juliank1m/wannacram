@@ -1,25 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-function redirectOrigin(request: Request): string {
+/**
+ * Where the confirmation email should point. Only trusted, server-side sources
+ * — request headers like x-forwarded-host are attacker-controlled, and this URL
+ * ends up in an email that carries a login code.
+ *
+ * Deployments other than Vercel must set NEXT_PUBLIC_SITE_URL.
+ */
+function redirectOrigin(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
   if (fromEnv) return fromEnv;
 
-  // On Vercel, prefer the deployment URL so we don't accidentally fall back
-  // to whatever host the browser used (or proxy headers that look odd).
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  const host =
-    request.headers.get('x-forwarded-host')?.split(',')[0]?.trim() ??
-    request.headers.get('host') ??
-    null;
-  if (host) {
-    const proto =
-      request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() ??
-      (host.includes('localhost') || host.startsWith('127.') ? 'http' : 'https');
-    return `${proto}://${host}`;
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('NEXT_PUBLIC_SITE_URL is not set — confirmation links will point at localhost.');
   }
 
   return 'http://localhost:3000';
@@ -44,12 +42,12 @@ export async function POST(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const origin = redirectOrigin(request);
-  const next = encodeURIComponent('/auth/login?verified=1');
+  // The callback exchanges the code for a session, so the user lands signed in.
+  const origin = redirectOrigin();
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${origin}/auth/callback?next=${next}` },
+    options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent('/dashboard')}` },
   });
 
   if (error) {

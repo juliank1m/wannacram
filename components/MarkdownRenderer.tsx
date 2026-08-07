@@ -5,8 +5,40 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import type { Components } from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// PrismLight + explicit registration: the full Prism build bundles ~290
+// grammars (abap, brainfuck, wolfram...), which made the study page's JS
+// several times larger than every other route.
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+import c from 'react-syntax-highlighter/dist/esm/languages/prism/c';
+import cpp from 'react-syntax-highlighter/dist/esm/languages/prism/cpp';
+import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp';
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
+import go from 'react-syntax-highlighter/dist/esm/languages/prism/go';
+import java from 'react-syntax-highlighter/dist/esm/languages/prism/java';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
+import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+import rust from 'react-syntax-highlighter/dist/esm/languages/prism/rust';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import tsx from 'react-syntax-highlighter/dist/esm/languages/prism/tsx';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+
+const LANGUAGES = { bash, c, cpp, csharp, css, go, java, javascript, json, jsx, markup, python, rust, sql, tsx, typescript };
+const ALIASES: Record<string, keyof typeof LANGUAGES> = {
+  sh: 'bash', shell: 'bash', js: 'javascript', ts: 'typescript',
+  py: 'python', html: 'markup', xml: 'markup', 'c++': 'cpp', cs: 'csharp',
+};
+
+for (const [name, grammar] of Object.entries(LANGUAGES)) {
+  SyntaxHighlighter.registerLanguage(name, grammar);
+}
+for (const [alias, target] of Object.entries(ALIASES)) {
+  SyntaxHighlighter.registerLanguage(alias, LANGUAGES[target]);
+}
 
 const components: Components = {
   h1: ({ children }) => <h1 className="text-xl font-bold mt-3 mb-2 first:mt-0">{children}</h1>,
@@ -65,9 +97,13 @@ export default function MarkdownRenderer({
   content,
   className,
 }: {
-  content: string;
+  content: string | null | undefined;
   className?: string;
 }) {
+  // Callers pass fields straight out of model-generated JSON, so a missing key
+  // would otherwise throw inside normalizeLatex and blank the whole page.
+  const text = typeof content === 'string' ? content : '';
+
   return (
     <div className={className}>
       <ReactMarkdown
@@ -75,7 +111,7 @@ export default function MarkdownRenderer({
         rehypePlugins={[rehypeKatex]}
         components={components}
       >
-        {normalizeLatex(content)}
+        {normalizeLatex(text)}
       </ReactMarkdown>
     </div>
   );

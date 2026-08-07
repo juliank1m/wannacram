@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import type { Topic } from '@/types';
@@ -15,14 +15,21 @@ const FILE_TYPE_LABELS: Record<string, string> = { pdf: 'PDF', docx: 'DOC', pptx
 export default function DashboardPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  // A swallowed failure here renders "INVENTORY EMPTY", which reads as
+  // "your topics are gone" rather than "the request failed".
+  const loadTopics = useCallback(() => {
+    setLoading(true);
+    setError(false);
     fetch('/api/topics')
       .then((res) => res.ok ? res.json() : Promise.reject())
       .then((data) => setTopics(data.topics ?? []))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { loadTopics(); }, [loadTopics]);
 
   return (
     <>
@@ -44,6 +51,21 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="pixel-spinner" />
             <p className="font-pixelify font-semibold text-[15px] text-ink/60 pixel-cursor">Loading</p>
+          </div>
+        ) : error ? (
+          <div className="pixel-box p-0 max-w-md mx-auto overflow-hidden"
+               style={{ boxShadow: '4px 4px 0 var(--px-red)', borderColor: 'var(--px-red)' }}>
+            <div className="pixel-titlebar" style={{ background: 'var(--px-red)', borderBottomColor: 'var(--px-red)' }}>
+              CONNECTION LOST
+            </div>
+            <div className="p-8 text-center">
+              <p className="font-vt323 text-xl text-ink/60 mb-6 leading-relaxed">
+                Could not load your topics.
+              </p>
+              <button onClick={loadTopics} className="pixel-btn pixel-btn-primary">
+                RETRY
+              </button>
+            </div>
           </div>
         ) : topics.length === 0 ? (
           <div className="pixel-box p-0 max-w-md mx-auto overflow-hidden">

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import type { AIModel, Message } from '@/types';
+import { getUserFriendlyAiError } from '@/lib/error-messages';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -12,13 +13,21 @@ const openai = new OpenAI({
 
 export { anthropic, openai };
 
+export const AI_MODELS = ['claude-sonnet', 'gpt-4o-mini', 'gpt-5-mini'] as const;
+
+export function isAIModel(value: unknown): value is AIModel {
+  return typeof value === 'string' && (AI_MODELS as readonly string[]).includes(value);
+}
+
 const OPENAI_MODEL_IDS = {
   'gpt-4o-mini': 'gpt-4o-mini',
   'gpt-5-mini': 'gpt-5-mini',
 } satisfies Partial<Record<AIModel, string>>;
 
 function getOpenAIModelId(model: AIModel) {
-  return model in OPENAI_MODEL_IDS
+  // hasOwnProperty, not `in` — `in` walks the prototype chain, so a model of
+  // "constructor" would resolve to Object and be sent as the model id.
+  return Object.prototype.hasOwnProperty.call(OPENAI_MODEL_IDS, model)
     ? OPENAI_MODEL_IDS[model as keyof typeof OPENAI_MODEL_IDS]
     : null;
 }
@@ -78,6 +87,18 @@ export function streamChat(
   const encoder = new TextEncoder();
   const openaiModel = getOpenAIModelId(model);
 
+  // Set once the provider stream exists, so cancel() can stop it. Without this
+  // the provider keeps generating (and billing) after the client disconnects.
+  let abortProvider: (() => void) | null = null;
+
+  const sendError = (controller: ReadableStreamDefaultController, err: unknown) => {
+    console.error('streamChat error:', err);
+    controller.enqueue(
+      encoder.encode(`data: ${JSON.stringify({ error: getUserFriendlyAiError(err) })}\n\n`)
+    );
+    controller.close();
+  };
+
   if (openaiModel) {
     return new ReadableStream({
       async start(controller) {
@@ -94,6 +115,7 @@ export function streamChat(
               })),
             ],
           });
+          abortProvider = () => stream.controller.abort();
 
           for await (const chunk of stream) {
             const text = chunk.choices[0]?.delta?.content;
@@ -106,13 +128,11 @@ export function streamChat(
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (err) {
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: err instanceof Error ? err.message : 'Stream error' })}\n\n`
-            )
-          );
-          controller.close();
+          sendError(controller, err);
         }
+      },
+      cancel() {
+        abortProvider?.();
       },
     });
   }
@@ -130,6 +150,7 @@ export function streamChat(
             content: m.content,
           })),
         });
+        abortProvider = () => stream.abort();
 
         for await (const event of stream) {
           if (
@@ -144,13 +165,11 @@ export function streamChat(
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
         controller.close();
       } catch (err) {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ error: err instanceof Error ? err.message : 'Stream error' })}\n\n`
-          )
-        );
-        controller.close();
+        sendError(controller, err);
       }
+    },
+    cancel() {
+      abortProvider?.();
     },
   });
 }
@@ -181,9 +200,3 @@ export async function generateCompletion(
 
   return response.content[0].type === 'text' ? response.content[0].text : '';
 }
-
-export const MODEL_LABELS: Record<AIModel, string> = {
-  'claude-sonnet': 'Claude Sonnet',
-  'gpt-4o-mini': 'GPT-4o Mini',
-  'gpt-5-mini': 'GPT-5 Mini',
-};

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase';
 import { notifyTopicDocumentsChanged, resetTopicStudySessions } from '@/lib/topic-context';
 
@@ -37,12 +37,18 @@ export default function TopicFilesPanel({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const fetchDocs = useCallback(() => {
     setLoading(true);
+    setLoadError(null);
     fetch(`/api/topics/${topicId}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to load files');
+        return r.json();
+      })
       .then((d) => {
         const entries: DocEntry[] = (d.topic?.topic_documents ?? []).map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,13 +56,31 @@ export default function TopicFilesPanel({
         ).filter(Boolean);
         setDocs(entries);
       })
-      .catch(() => {})
+      // Showing the empty state on failure reads as "no files" and invites a
+      // re-upload, which duplicates the document and wipes saved sessions.
+      .catch(() => setLoadError('COULD NOT LOAD FILES'))
       .finally(() => setLoading(false));
   }, [topicId]);
 
   useEffect(() => {
     if (isOpen) fetchDocs();
   }, [isOpen, fetchDocs]);
+
+  // The closed panel is only translated off-screen, so without this its
+  // buttons — including per-file delete — stay in the tab order.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    if (isOpen) panel.removeAttribute('inert');
+    else panel.setAttribute('inert', '');
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
 
   const handleDelete = async (docId: string) => {
     setError(null);
@@ -150,8 +174,12 @@ export default function TopicFilesPanel({
 
       {/* Panel */}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Topic files"
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-background border-l-[3px] border-ink z-50 flex flex-col transition-transform duration-200 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          isOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
         }`}
       >
         {/* Header */}
@@ -168,6 +196,11 @@ export default function TopicFilesPanel({
             <div className="flex flex-col items-center justify-center pt-12 gap-3">
               <div className="pixel-spinner" style={{ width: 24, height: 24, borderWidth: 3 }} />
               <p className="font-pixelify font-semibold text-[14px] text-ink/60">Loading files</p>
+            </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-center justify-center pt-12 gap-4 text-center">
+              <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)]">{loadError}</p>
+              <button onClick={fetchDocs} className="pixel-btn text-[11px]">RETRY</button>
             </div>
           ) : docs.length === 0 ? (
             <p className="font-pixelify font-semibold text-[14px] text-ink/50 text-center pt-12">

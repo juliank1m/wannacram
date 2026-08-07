@@ -29,22 +29,30 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // getUser() may have refreshed the session and written rotated auth cookies
+  // onto supabaseResponse. A bare NextResponse.redirect carries no Set-Cookie,
+  // so the browser would keep a refresh token Supabase has already consumed and
+  // get logged out mid-session. Carry the cookies over to the redirect.
+  const redirectTo = (pathname: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    const response = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+    return response;
+  };
+
   // Redirect unauthenticated users to login (except for auth routes, API, and landing)
   const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
   const isLandingPage = request.nextUrl.pathname === '/';
 
   if (!user && !isAuthRoute && !isApiRoute && !isLandingPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/auth/login';
-    return NextResponse.redirect(url);
+    return redirectTo('/auth/login');
   }
 
   // Redirect authenticated users away from auth pages
   if (user && isAuthRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+    return redirectTo('/dashboard');
   }
 
   return supabaseResponse;

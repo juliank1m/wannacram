@@ -60,6 +60,9 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed');
       const data = await res.json();
+      if (!Array.isArray(data.flashcards) || data.flashcards.length === 0) {
+        throw new Error('The card deck came back empty. Please try again.');
+      }
       setFlashcards(data.flashcards);
       setGenerated(true);
       fetch('/api/sessions', {
@@ -117,6 +120,13 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
 
   return (
     <div className="flex flex-col items-center h-full">
+      {/* REDO can fail here too — without this the error is silent */}
+      {error && (
+        <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mb-3 leading-relaxed">
+          {error}
+        </p>
+      )}
+
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-4">
         <div className="flex justify-between font-pixelify font-semibold text-[14px] text-ink/70 mb-2">
@@ -136,7 +146,11 @@ export default function FlashcardDeck({ topicId, model }: { topicId: string; mod
         onClick={() => setFlipped(!flipped)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && setFlipped(!flipped)}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault(); // Space would otherwise scroll the page
+          setFlipped(!flipped);
+        }}
         className="w-full max-w-lg flex-1 max-h-64 cursor-pointer relative overflow-hidden"
         style={{
           border: '3px solid var(--ink)',

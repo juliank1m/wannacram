@@ -12,6 +12,10 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
   const [sessionLoading, setSessionLoading] = useState(true);
   const [contextUpdated, setContextUpdated] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  // Aborts the in-flight stream; the counter marks its results stale so a
+  // response that arrives after a reset or unmount can't resurrect old state.
+  const abortRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
 
   // Load session
   useEffect(() => {
@@ -35,6 +39,13 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
       const detail = (event as CustomEvent<{ topicId?: string }>).detail;
       if (detail?.topicId !== topicId) return;
 
+      // Stop any running stream first — otherwise its loop keeps appending to
+      // the conversation we are clearing, and then persists it, recreating the
+      // session row the upload just deleted.
+      requestIdRef.current++;
+      abortRef.current?.abort();
+      abortRef.current = null;
+
       setMessages([]);
       setInput('');
       setStreaming(false);
@@ -47,6 +58,19 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
       window.removeEventListener(TOPIC_DOCUMENTS_CHANGED_EVENT, handleTopicDocumentsChanged);
     };
   }, [topicId]);
+
+  // Cancel the stream when the component goes away (e.g. switching to CARDS).
+  // These refs hold a counter and an AbortController, not a DOM node, so
+  // reading the current value at cleanup time is exactly what we want.
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    return () => {
+      requestIdRef.current++;
+      abortRef.current?.abort();
+      abortRef.current = null;
+    };
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Persist draft
   useEffect(() => {
@@ -73,11 +97,17 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
     setStreaming(true);
     setMessages([...newMessages, { role: 'assistant', content: '' }]);
 
+    const requestId = ++requestIdRef.current;
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const isStale = () => requestIdRef.current !== requestId;
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topicId, messages: newMessages, model }),
+        signal: controller.signal,
       });
 
       if (!res.ok) {
@@ -90,23 +120,36 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
       if (!reader) throw new Error('No response body');
 
       let fullContent = '';
-      while (true) {
+      // SSE frames do not align with read boundaries: a chunk can end mid-frame.
+      // Hold the trailing partial line over to the next read instead of parsing
+      // (and silently dropping) it.
+      let buffer = '';
+      let finished = false;
+
+      while (!finished) {
         const { done, value } = await reader.read();
         if (done) break;
-        for (const line of decoder.decode(value, { stream: true }).split('\n')) {
+        if (isStale()) { await reader.cancel(); return; }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const data = line.slice(6);
-          if (data === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) {
-              fullContent += parsed.text;
-              setMessages([...newMessages, { role: 'assistant', content: fullContent }]);
-            }
-            if (parsed.error) throw new Error(parsed.error);
-          } catch (e) { if (e instanceof SyntaxError) continue; throw e; }
+          if (data === '[DONE]') { finished = true; break; }
+
+          const parsed = JSON.parse(data);
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.text) {
+            fullContent += parsed.text;
+            setMessages([...newMessages, { role: 'assistant', content: fullContent }]);
+          }
         }
       }
+
+      if (isStale()) return;
 
       const finalMessages: Message[] = [...newMessages, { role: 'assistant', content: fullContent }];
       fetch('/api/sessions', {
@@ -115,12 +158,14 @@ export default function ChatInterface({ topicId, model }: { topicId: string; mod
         body: JSON.stringify({ topicId, mode: 'chat', data: finalMessages }),
       }).catch(() => {});
     } catch (err) {
+      if (isStale() || (err instanceof DOMException && err.name === 'AbortError')) return;
       setMessages([...newMessages, {
         role: 'assistant',
         content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
       }]);
     } finally {
-      setStreaming(false);
+      if (!isStale()) setStreaming(false);
+      if (abortRef.current === controller) abortRef.current = null;
     }
   };
 

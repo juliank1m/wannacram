@@ -90,6 +90,9 @@ export default function QuizMode({ topicId, model }: { topicId: string; model: A
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed');
       const data = await res.json();
+      if (!Array.isArray(data.questions) || data.questions.length === 0) {
+        throw new Error('The quiz came back empty. Please try again.');
+      }
       setQuestions(data.questions);
       setGenerated(true);
       setCurrentIndex(0);
@@ -190,6 +193,8 @@ export default function QuizMode({ topicId, model }: { topicId: string; model: A
             <div className="border-[3px] border-ink h-5 w-full mb-8 overflow-hidden">
               <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: gradeColor }} />
             </div>
+            {/* NEW QUIZ can fail here too — without this the error is silent */}
+            {error && <p className="font-pixelify font-semibold text-[14px] text-[var(--px-red)] mb-4 leading-relaxed">{error}</p>}
             <div className="flex gap-3 justify-center">
               <button onClick={retry} className="pixel-btn">RETRY</button>
               <button onClick={generate} disabled={loading} className="pixel-btn pixel-btn-primary">
@@ -234,10 +239,13 @@ export default function QuizMode({ topicId, model }: { topicId: string; model: A
           const isCorrect = letter === q.answer;
           let bg = 'bg-surface hover:bg-[var(--surface-alt)]';
           let shadow = '3px 3px 0 var(--ink)';
-          let border = 'border-ink';
+          // Hold the colour value, not a class name: `border-${border}` was a
+          // runtime-built class Tailwind never emitted, and nesting it in var()
+          // produced the invalid `var([var(--px-green)])`.
+          let borderColor = 'var(--ink)';
           if (selectedAnswer) {
-            if (isCorrect) { bg = 'bg-[var(--px-green)]/20'; border = 'border-[var(--px-green)]'; shadow = '3px 3px 0 var(--px-green)'; }
-            else if (isSelected) { bg = 'bg-[var(--px-red)]/20'; border = 'border-[var(--px-red)]'; shadow = '3px 3px 0 var(--px-red)'; }
+            if (isCorrect) { bg = 'bg-[var(--px-green)]/20'; borderColor = 'var(--px-green)'; shadow = '3px 3px 0 var(--px-green)'; }
+            else if (isSelected) { bg = 'bg-[var(--px-red)]/20'; borderColor = 'var(--px-red)'; shadow = '3px 3px 0 var(--px-red)'; }
             else { bg = 'bg-surface opacity-40'; }
           }
           return (
@@ -245,8 +253,8 @@ export default function QuizMode({ topicId, model }: { topicId: string; model: A
               key={option}
               onClick={() => handleAnswer(option)}
               disabled={!!selectedAnswer}
-              className={`w-full text-left border-[3px] px-4 py-3 font-inter text-[15px] transition-all duration-75 ${bg} border-${border}`}
-              style={{ borderColor: `var(--${border === 'border-ink' ? 'ink' : border.replace('border-', '')})`, boxShadow: shadow }}
+              className={`w-full text-left border-[3px] px-4 py-3 font-inter text-[15px] transition-all duration-75 ${bg}`}
+              style={{ borderColor, boxShadow: shadow }}
             >
               <MarkdownRenderer content={option} />
             </button>

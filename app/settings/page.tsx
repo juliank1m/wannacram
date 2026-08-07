@@ -140,12 +140,12 @@ export default function SettingsPage() {
           </div>
           <form onSubmit={saveProfile} className="space-y-4">
             <div>
-              <label className="pixel-label">DISPLAY NAME</label>
-              <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="pixel-input" />
+              <label htmlFor="display-name" className="pixel-label">DISPLAY NAME</label>
+              <input id="display-name" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="pixel-input" />
             </div>
             <div>
-              <label className="pixel-label">EMAIL</label>
-              <input type="email" value={profile.email} disabled className="pixel-input" />
+              <label htmlFor="email" className="pixel-label">EMAIL</label>
+              <input id="email" type="email" value={profile.email} disabled className="pixel-input" />
               <p className="font-vt323 text-[16px] text-ink/60 mt-1">Email cannot be changed.</p>
             </div>
             {profileMsg && <Msg type={profileMsg.type} text={profileMsg.text} />}
@@ -159,12 +159,12 @@ export default function SettingsPage() {
         <PixelSection title="▶ CHANGE PASSWORD">
           <form onSubmit={changePassword} className="space-y-4">
             <div>
-              <label className="pixel-label">NEW PASSWORD</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="pixel-input" />
+              <label htmlFor="new-password" className="pixel-label">NEW PASSWORD</label>
+              <input id="new-password" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="pixel-input" />
             </div>
             <div>
-              <label className="pixel-label">CONFIRM PASSWORD</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" className="pixel-input" />
+              <label htmlFor="confirm-password" className="pixel-label">CONFIRM PASSWORD</label>
+              <input id="confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" className="pixel-input" />
             </div>
             {passwordMsg && <Msg type={passwordMsg.type} text={passwordMsg.text} />}
             <button type="submit" disabled={savingPassword || !newPassword || !confirmPassword} className="pixel-btn pixel-btn-primary">
@@ -183,10 +183,10 @@ export default function SettingsPage() {
             <p className="font-vt323 text-xl text-ink/75 mb-5 leading-snug">
               Permanently deletes your account and all documents, flashcards, and quiz history. This cannot be undone.
             </p>
-            <p className="font-vt323 text-xl mb-3">
+            <label htmlFor="delete-confirm" className="font-vt323 text-xl mb-3 block">
               Type <span className="font-pixelify font-bold text-[inherit]">delete my account</span> to confirm:
-            </p>
-            <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="delete my account" className="pixel-input mb-4"
+            </label>
+            <input id="delete-confirm" type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="delete my account" className="pixel-input mb-4"
                    style={{ borderColor: 'var(--px-red)' }} />
             {deleteMsg && <Msg type="error" text={deleteMsg.text} />}
             <button onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'delete my account'} className="pixel-btn pixel-btn-danger">

@@ -3,20 +3,30 @@ const pdfParse = require('pdf-parse');
 import mammoth from 'mammoth';
 import JSZip from 'jszip';
 
+// A single document never needs to be longer than the whole LLM context budget.
+// Capping here means no caller can store an unbounded blob in extracted_text.
+export const MAX_EXTRACTED_CHARS = 150_000;
+
 export async function extractText(
   buffer: Buffer,
   fileType: string
 ): Promise<string> {
+  let text: string;
   switch (fileType) {
     case 'pdf':
-      return extractPdfText(buffer);
+      text = await extractPdfText(buffer);
+      break;
     case 'docx':
-      return extractDocxText(buffer);
+      text = await extractDocxText(buffer);
+      break;
     case 'pptx':
-      return extractPptxText(buffer);
+      text = await extractPptxText(buffer);
+      break;
     default:
       throw new Error(`Unsupported file type: ${fileType}`);
   }
+
+  return text.length > MAX_EXTRACTED_CHARS ? text.slice(0, MAX_EXTRACTED_CHARS) : text;
 }
 
 async function extractPdfText(buffer: Buffer): Promise<string> {
@@ -37,6 +47,10 @@ async function extractDocxText(buffer: Buffer): Promise<string> {
   return result.value;
 }
 
+// Ceiling on decompressed slide XML. A small .pptx can inflate to gigabytes
+// (zip bomb), and JSZip decompresses into memory with no budget of its own.
+const MAX_PPTX_INFLATED_BYTES = 100 * 1024 * 1024;
+
 async function extractPptxText(buffer: Buffer): Promise<string> {
   const zip = await JSZip.loadAsync(buffer);
   const texts: string[] = [];
@@ -45,13 +59,23 @@ async function extractPptxText(buffer: Buffer): Promise<string> {
     .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
     .sort();
 
+  let inflated = 0;
+  let extractedChars = 0;
+
   for (const fileName of slideFiles) {
     const xml = await zip.files[fileName].async('text');
+    inflated += xml.length;
+    if (inflated > MAX_PPTX_INFLATED_BYTES) {
+      throw new Error('This PPTX file is too large to process.');
+    }
+
     // Extract text from XML tags <a:t>...</a:t>
     const matches = xml.match(/<a:t>([^<]*)<\/a:t>/g);
     if (matches) {
       const slideTexts = matches.map((m) => m.replace(/<\/?a:t>/g, ''));
       texts.push(slideTexts.join(' '));
+      extractedChars += slideTexts.reduce((n, s) => n + s.length, 0);
+      if (extractedChars >= MAX_EXTRACTED_CHARS) break;
     }
   }
 

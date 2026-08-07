@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase-server';
-import { extractText, getFileType } from '@/lib/parsers';
+import { extractText, getFileType, validateFileSize } from '@/lib/parsers';
+import { readJson, isOwnedStoragePath } from '@/lib/http';
 
 // POST /api/topics/[topicId]/documents
 // Body: { filePath: string, fileName: string, fileType: string }
@@ -27,13 +28,14 @@ export async function POST(
       return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
     }
 
-    const { filePath, fileName } = await request.json();
-    if (!filePath || !fileName) {
+    const body = await readJson<{ filePath?: unknown; fileName?: unknown }>(request);
+    const fileName = typeof body?.fileName === 'string' ? body.fileName : '';
+    if (!body?.filePath || !fileName) {
       return NextResponse.json({ error: 'Missing filePath or fileName' }, { status: 400 });
     }
 
-    // Verify the storage path is owned by this user (must start with their user ID)
-    if (!filePath.startsWith(`${user.id}/`)) {
+    const { filePath } = body;
+    if (!isOwnedStoragePath(filePath, user.id)) {
       return NextResponse.json({ error: 'Invalid file path' }, { status: 403 });
     }
 
@@ -56,6 +58,16 @@ export async function POST(
       return NextResponse.json(
         { error: 'Failed to retrieve uploaded file from storage' },
         { status: 500 }
+      );
+    }
+
+    // The 20MB limit is also checked in the browser, but the browser uploads
+    // straight to Storage with the anon key — this is the only server-side gate.
+    if (!validateFileSize(fileData.size)) {
+      await serviceClient.storage.from('documents').remove([filePath]);
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 20MB.' },
+        { status: 400 }
       );
     }
 
@@ -96,6 +108,11 @@ export async function POST(
       .insert({ topic_id: params.topicId, document_id: document.id });
 
     if (linkError) {
+      // The document row is already committed but unreachable — no topic links
+      // to it — and the client cleans up the storage object on failure, which
+      // would leave a row with a dangling file_path that still counts towards
+      // the user's document total. Roll it back.
+      await serviceClient.from('documents').delete().eq('id', document.id);
       return NextResponse.json({ error: 'Failed to link document to topic' }, { status: 500 });
     }
 

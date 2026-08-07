@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import FlashcardDeck from '@/components/FlashcardDeck';
@@ -42,16 +42,31 @@ export default function TopicStudyPage({ params }: { params: { topicId: string }
       .catch(() => {});
   }, [params.topicId]);
 
+  // Leaving the page clears the chat draft and rewinds an unfinished quiz.
+  // Both are destructive, and React StrictMode double-invokes effects in dev —
+  // the cleanup would fire immediately after mount and wipe what was just
+  // loaded. Deferring by a tick lets the remount cancel it, so only a real
+  // unmount gets through.
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const topicId = params.topicId;
+
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+
     return () => {
-      try { sessionStorage.removeItem(`chat-draft-${topicId}`); } catch {}
-      fetch('/api/sessions', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topicId }),
-        keepalive: true,
-      }).catch(() => {});
+      leaveTimerRef.current = setTimeout(() => {
+        try { sessionStorage.removeItem(`chat-draft-${topicId}`); } catch {}
+        fetch('/api/sessions', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topicId }),
+          keepalive: true,
+        }).catch(() => {});
+      }, 0);
     };
   }, [params.topicId]);
 

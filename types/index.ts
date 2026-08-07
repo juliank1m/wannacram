@@ -1,13 +1,3 @@
-export interface Document {
-  id: string;
-  user_id: string;
-  title: string;
-  file_path: string;
-  extracted_text: string;
-  file_type: 'pdf' | 'docx' | 'pptx';
-  created_at: string;
-}
-
 export interface Topic {
   id: string;
   user_id: string;
@@ -25,15 +15,6 @@ export interface TopicDocument {
     file_type: 'pdf' | 'docx' | 'pptx';
     created_at: string;
   };
-}
-
-export interface StudySession {
-  id: string;
-  user_id: string;
-  topic_id: string;
-  mode: 'chat' | 'flashcards' | 'quiz';
-  messages: Message[];
-  created_at: string;
 }
 
 export interface Message {
