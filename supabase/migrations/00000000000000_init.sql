@@ -1,9 +1,14 @@
--- Base schema: documents and study_sessions.
+-- Baseline schema: documents and study_sessions.
 --
 -- These tables predate the migrations directory, so nothing here created them
 -- and `supabase db reset` aborted on 20260303_topics.sql, which references
--- documents and alters study_sessions. Everything below is idempotent so it is
--- also safe to apply to a database where the tables already exist.
+-- documents and alters study_sessions.
+--
+-- On the existing project this file is a reconstruction of what is already
+-- there — mark it applied with `supabase migration repair` rather than running
+-- it (see supabase/README.md). It is idempotent either way. Policy tuning and
+-- Data API grants live in 20260807_data_api_grants.sql so they apply to the
+-- existing project too.
 
 create table if not exists documents (
   id uuid primary key default gen_random_uuid(),
@@ -27,34 +32,18 @@ create table if not exists study_sessions (
 alter table documents enable row level security;
 alter table study_sessions enable row level security;
 
--- `to authenticated` so the policy is not evaluated for anon at all, and
--- `(select auth.uid())` so the function is evaluated once per statement
--- instead of once per row.
-drop policy if exists "Users can manage their own documents" on documents;
-create policy "Users can manage their own documents"
+-- Baseline policies so a freshly reset database is never left open between
+-- this migration and 20260807_data_api_grants.sql, which replaces them.
+drop policy if exists documents_all_own on documents;
+create policy documents_all_own
   on documents for all
   to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
-drop policy if exists "Users can manage their own study sessions" on study_sessions;
-create policy "Users can manage their own study sessions"
+drop policy if exists study_sessions_all_own on study_sessions;
+create policy study_sessions_all_own
   on study_sessions for all
   to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
-
--- Data API grants. Tables created via SQL are no longer exposed automatically
--- (default for new projects since 2026-05-30, applied to existing projects on
--- 2026-10-30), so without these the app's PostgREST queries start failing.
---
--- Least privilege, matched to how the app actually queries:
---   anon           — nothing. The browser client only calls auth.* and storage.*.
---   authenticated  — reads everywhere; writes only to study_sessions. Every
---                    other write deliberately goes through the service role.
--- Move a write off the service-role client and you must add its grant here.
-grant select on table public.documents to authenticated;
-grant select, insert, update, delete on table public.study_sessions to authenticated;
-
-grant select, insert, update, delete on table public.documents to service_role;
-grant select, insert, update, delete on table public.study_sessions to service_role;
