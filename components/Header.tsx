@@ -19,13 +19,14 @@ function PixelAvatar({ name, email }: { name: string | null; email: string }) {
 
 export default function Header({ showAuthLinks = false }: { showAuthLinks?: boolean }) {
   const router = useRouter();
-  const supabase = createClient();
   const [userInfo, setUserInfo] = useState<{ email: string; displayName: string | null } | null>(null);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // createBrowserClient is a singleton, so calling it where it is used avoids
+  // holding a value in render scope that the effect would have to depend on.
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    createClient().auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUserInfo({
           email: user.email ?? '',
@@ -47,7 +48,7 @@ export default function Header({ showAuthLinks = false }: { showAuthLinks?: bool
 
   const handleLogout = async () => {
     setOpen(false);
-    await supabase.auth.signOut();
+    await createClient().auth.signOut();
     router.push('/');
     router.refresh();
   };
