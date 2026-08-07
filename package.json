@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --experimental-strip-types --test lib/*.test.mjs"
+    "test": "node --experimental-strip-types --test lib/*.test.mjs",
+    "verify:db": "./supabase/verify-migrations.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

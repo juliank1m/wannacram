@@ -27,14 +27,34 @@ create table if not exists study_sessions (
 alter table documents enable row level security;
 alter table study_sessions enable row level security;
 
+-- `to authenticated` so the policy is not evaluated for anon at all, and
+-- `(select auth.uid())` so the function is evaluated once per statement
+-- instead of once per row.
 drop policy if exists "Users can manage their own documents" on documents;
 create policy "Users can manage their own documents"
   on documents for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can manage their own study sessions" on study_sessions;
 create policy "Users can manage their own study sessions"
   on study_sessions for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Data API grants. Tables created via SQL are no longer exposed automatically
+-- (default for new projects since 2026-05-30, applied to existing projects on
+-- 2026-10-30), so without these the app's PostgREST queries start failing.
+--
+-- Least privilege, matched to how the app actually queries:
+--   anon           — nothing. The browser client only calls auth.* and storage.*.
+--   authenticated  — reads everywhere; writes only to study_sessions. Every
+--                    other write deliberately goes through the service role.
+-- Move a write off the service-role client and you must add its grant here.
+grant select on table public.documents to authenticated;
+grant select, insert, update, delete on table public.study_sessions to authenticated;
+
+grant select, insert, update, delete on table public.documents to service_role;
+grant select, insert, update, delete on table public.study_sessions to service_role;

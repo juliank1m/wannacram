@@ -44,3 +44,11 @@ create index if not exists documents_user_id_idx on documents (user_id);
 create index if not exists study_sessions_user_id_idx on study_sessions (user_id);
 create index if not exists topics_user_id_idx on topics (user_id);
 create index if not exists topic_documents_document_id_idx on topic_documents (document_id);
+
+-- 4. Postgres does not index foreign key columns automatically. Both of these
+--    now cascade, and an unindexed referencing column turns every parent delete
+--    into a sequential scan of study_sessions while holding a lock. Neither is
+--    covered by an existing index: study_sessions_user_topic_mode_idx leads
+--    with user_id, so it cannot serve a topic_id-only predicate.
+create index if not exists study_sessions_topic_id_idx on study_sessions (topic_id);
+create index if not exists study_sessions_document_id_idx on study_sessions (document_id);
