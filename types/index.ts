@@ -34,4 +34,16 @@ export interface QuizQuestion {
   explanation: string;
 }
 
-export type AIModel = 'claude-sonnet' | 'gpt-4o-mini' | 'gpt-5-mini';
+export const AI_MODELS = ['claude-haiku', 'gpt-5.6-luna'] as const;
+
+export type AIModel = (typeof AI_MODELS)[number];
+
+export const DEFAULT_AI_MODEL: AIModel = 'claude-haiku';
+
+/**
+ * Lives here rather than in lib/ai.ts so client components can validate a model
+ * without pulling the Anthropic and OpenAI SDKs into the browser bundle.
+ */
+export function isAIModel(value: unknown): value is AIModel {
+  return typeof value === 'string' && (AI_MODELS as readonly string[]).includes(value);
+}

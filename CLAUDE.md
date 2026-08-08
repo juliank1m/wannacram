@@ -13,7 +13,7 @@ A web app where students upload lecture notes, slides, or past exams (PDF/PPTX/D
 - **Auth:** Supabase Auth
 - **Database:** Supabase (PostgreSQL)
 - **File Storage:** Supabase Storage
-- **LLM:** Anthropic Claude API (`claude-sonnet-4-6`)
+- **LLM:** Anthropic Claude API (`claude-haiku-4-5`) and OpenAI (`gpt-5.6-luna`)
 - **Document Parsing:** `pdf-parse`, `mammoth` (DOCX), `officegen` (PPTX)
 - **Package Manager:** npm
 

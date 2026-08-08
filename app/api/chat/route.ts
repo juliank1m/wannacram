@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { CHAT_SYSTEM_PROMPT, streamChat, isAIModel } from '@/lib/ai';
+import { CHAT_SYSTEM_PROMPT, streamChat, isAIModel, DEFAULT_AI_MODEL } from '@/lib/ai';
 import { getTopicText } from '@/lib/topics';
 import { getUserFriendlyAiError } from '@/lib/error-messages';
 import { readJson, rateLimit, AI_RATE_LIMIT } from '@/lib/http';
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const body = await readJson<{ topicId?: unknown; messages?: unknown; model?: unknown }>(request);
     const topicId = typeof body?.topicId === 'string' ? body.topicId : '';
     const messages = parseMessages(body?.messages);
-    const model = isAIModel(body?.model) ? body.model : 'claude-sonnet';
+    const model = isAIModel(body?.model) ? body.model : DEFAULT_AI_MODEL;
 
     if (!topicId || !messages) {
       return NextResponse.json({ error: 'Missing topicId or messages' }, { status: 400 });

@@ -3,6 +3,11 @@ import OpenAI from 'openai';
 import type { AIModel, Message } from '@/types';
 import { getUserFriendlyAiError } from '@/lib/error-messages';
 
+// Re-exported so API routes can validate a model without a second import.
+export { AI_MODELS, DEFAULT_AI_MODEL, isAIModel } from '@/types';
+
+const ANTHROPIC_MODEL_ID = 'claude-haiku-4-5';
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -13,15 +18,8 @@ const openai = new OpenAI({
 
 export { anthropic, openai };
 
-export const AI_MODELS = ['claude-sonnet', 'gpt-4o-mini', 'gpt-5-mini'] as const;
-
-export function isAIModel(value: unknown): value is AIModel {
-  return typeof value === 'string' && (AI_MODELS as readonly string[]).includes(value);
-}
-
 const OPENAI_MODEL_IDS = {
-  'gpt-4o-mini': 'gpt-4o-mini',
-  'gpt-5-mini': 'gpt-5-mini',
+  'gpt-5.6-luna': 'gpt-5.6-luna',
 } satisfies Partial<Record<AIModel, string>>;
 
 function getOpenAIModelId(model: AIModel) {
@@ -137,12 +135,12 @@ export function streamChat(
     });
   }
 
-  // Default: Claude Sonnet
+  // Default: Claude Haiku 4.5
   return new ReadableStream({
     async start(controller) {
       try {
         const stream = anthropic.messages.stream({
-          model: 'claude-sonnet-4-6',
+          model: ANTHROPIC_MODEL_ID,
           max_tokens: 4096,
           system: systemPrompt,
           messages: messages.map((m) => ({
@@ -191,9 +189,9 @@ export async function generateCompletion(
     return response.choices[0]?.message?.content ?? '';
   }
 
-  // Default: Claude Sonnet
+  // Default: Claude Haiku 4.5
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: ANTHROPIC_MODEL_ID,
     max_tokens: 4096,
     messages: [{ role: 'user', content: prompt }],
   });

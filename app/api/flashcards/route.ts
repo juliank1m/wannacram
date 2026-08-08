@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { FLASHCARD_PROMPT, generateCompletion, isAIModel } from '@/lib/ai';
+import { FLASHCARD_PROMPT, generateCompletion, isAIModel, DEFAULT_AI_MODEL } from '@/lib/ai';
 import { isFlashcard, parseModelJsonArray } from '@/lib/model-output';
 import { getTopicText } from '@/lib/topics';
 import { getUserFriendlyAiError } from '@/lib/error-messages';
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const body = await readJson<{ topicId?: unknown; model?: unknown }>(request);
     const topicId = typeof body?.topicId === 'string' ? body.topicId : '';
-    const model = isAIModel(body?.model) ? body.model : 'claude-sonnet';
+    const model = isAIModel(body?.model) ? body.model : DEFAULT_AI_MODEL;
 
     if (!topicId) {
       return NextResponse.json({ error: 'Missing topicId' }, { status: 400 });

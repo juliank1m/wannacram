@@ -6,7 +6,7 @@ import ChatInterface from '@/components/ChatInterface';
 import FlashcardDeck from '@/components/FlashcardDeck';
 import QuizMode from '@/components/QuizMode';
 import TopicFilesPanel from '@/components/TopicFilesPanel';
-import type { AIModel } from '@/types';
+import { DEFAULT_AI_MODEL, isAIModel, type AIModel } from '@/types';
 
 type Mode = 'chat' | 'flashcards' | 'quiz';
 
@@ -17,19 +17,20 @@ const TABS: { mode: Mode; label: string }[] = [
 ];
 
 const MODELS: { value: AIModel; label: string }[] = [
-  { value: 'claude-sonnet', label: 'CLAUDE' },
-  { value: 'gpt-4o-mini',   label: 'GPT-4O' },
-  { value: 'gpt-5-mini',    label: 'GPT-5' },
+  { value: 'claude-haiku', label: 'HAIKU'   },
+  { value: 'gpt-5.6-luna', label: 'GPT-5.6' },
 ];
 
 export default function TopicStudyPage({ params }: { params: { topicId: string } }) {
   const [mode, setMode] = useState<Mode>('chat');
-  const [model, setModel] = useState<AIModel>('claude-sonnet');
+  const [model, setModel] = useState<AIModel>(DEFAULT_AI_MODEL);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`model-pref-topic-${params.topicId}`) as AIModel;
-      if (saved) setModel(saved);
+      // Validate rather than cast: a preference saved under the old model list
+      // would otherwise leave the picker with nothing selected.
+      const saved = localStorage.getItem(`model-pref-topic-${params.topicId}`);
+      if (isAIModel(saved)) setModel(saved);
     } catch {}
   }, [params.topicId]);
   const [title, setTitle] = useState('');
